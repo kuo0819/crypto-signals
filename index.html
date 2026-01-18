@@ -3,69 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto 新手保命導航儀 - 白話路況版</title>
+    <title>Crypto Pro 導航儀 - 專業分析師增強版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; }
         .tab-active { border-bottom: 4px solid #eab308; color: #eab308; }
         .calc-input { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 4px 8px; width: 120px; color: #eab308; font-weight: bold; }
-        .blink { animation: blinker 1.5s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.3; } }
+        .progress-bar { transition: width 0.5s ease-in-out; }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
+        <section class="mb-6 bg-gray-900/50 p-4 rounded-xl border border-gray-800">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xs font-bold text-gray-400">🌍 全市場路況統計 (前50大幣種)</h3>
+                <span id="market-status-text" class="text-xs font-bold">掃描中...</span>
+            </div>
+            <div class="w-full bg-red-900/30 h-4 rounded-full overflow-hidden flex">
+                <div id="bull-bar" class="bg-green-500 h-full progress-bar" style="width: 50%"></div>
+                <div id="bear-bar" class="bg-red-500 h-full progress-bar" style="width: 50%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] mt-1 text-gray-500 font-mono">
+                <span>漲勢家數: <span id="bull-count">0</span></span>
+                <span>跌勢家數: <span id="bear-count">0</span></span>
+            </div>
+        </section>
+
         <header class="mb-8 bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
                 <h1 class="text-3xl font-black text-yellow-500 tracking-tighter italic">新手交易導航儀</h1>
-                <p class="text-xs text-gray-400 mt-1">分析師提醒：先輸入你有多少錢，我幫你算每一筆買多少</p>
+                <p class="text-xs text-gray-400 mt-1">專業功能：熱力圖、多階停利、情緒過濾</p>
             </div>
             <div class="flex items-center gap-4 bg-black/50 p-4 rounded-xl border border-gray-800">
-                <label class="text-sm font-bold">💰 我的總本金 (USDT):</label>
-                <input type="number" id="total-capital" value="1000" oninput="analyze()" class="calc-input text-xl">
+                <label class="text-sm font-bold">💰 總本金 (USDT):</label>
+                <input type="number" id="total-capital" value="30" oninput="analyze()" class="calc-input text-xl">
             </div>
         </header>
 
         <nav class="flex space-x-10 mb-8 border-b border-gray-800 font-bold text-sm">
-            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-3 tab-active">💎 撿便宜區 (跌深等反彈)</button>
-            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-3 text-gray-500">🚀 衝刺區 (強勢追漲)</button>
-            <button onclick="switchTab('all')" id="btn-all" class="pb-3 text-gray-500">🌍 市場所有幣況</button>
+            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-3 tab-active">💎 撿便宜區</button>
+            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-3 text-gray-500">🚀 衝刺區</button>
+            <button onclick="switchTab('all')" id="btn-all" class="pb-3 text-gray-500">🔍 市場全掃描</button>
         </nav>
 
         <div id="oversold-section">
             <div id="oversold-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
-
         <div id="breakout-section" class="hidden">
             <div id="breakout-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
-
         <div id="all-section" class="hidden">
-            <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 text-xs">
-                <table class="w-full text-left">
+            <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
+                <table class="w-full text-left text-xs">
                     <thead class="bg-gray-800 text-gray-400 font-bold">
-                        <tr>
-                            <th class="p-4">貨幣名稱</th>
-                            <th class="p-4">目前價格</th>
-                            <th class="p-4 text-center">市場熱度</th>
-                            <th class="p-4">大環境坡度</th>
-                            <th class="p-4 text-right">建議操作</th>
-                        </tr>
+                        <tr><th class="p-4">貨幣</th><th class="p-4">價格</th><th class="p-4">熱度</th><th class="p-4">路況</th><th class="p-4">操作</th></tr>
                     </thead>
-                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono text-sm"></tbody>
+                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono"></tbody>
                 </table>
             </div>
         </div>
-
-        <footer class="mt-12 p-6 bg-red-900/10 border border-red-900/50 rounded-xl">
-            <h3 class="text-red-500 font-bold mb-2">🛑 新手保命符 (一定要記住)：</h3>
-            <ul class="text-xs text-gray-400 space-y-1">
-                <li>1. 看到「❌ 危險下坡」千萬不要買，那是在接掉下來的菜刀。</li>
-                <li>2. 看到「❌ 引擎沒油」代表沒人在買，就算漲也是假的。</li>
-                <li>3. 兩個都是「✅」才是真正的機會，但也要設停損！</li>
-            </ul>
-        </footer>
     </div>
 
     <script>
@@ -74,6 +71,14 @@
             const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
             const data = await res.json();
             const top50 = data.filter(d => d.symbol.endsWith('USDT')).sort((a, b) => b.quoteVolume - a.quoteVolume).slice(0, 50);
+
+            // 更新熱力圖
+            const bulls = top50.filter(c => parseFloat(c.priceChangePercent) > 0).length;
+            const bears = top50.length - bulls;
+            document.getElementById('bull-bar').style.width = `${(bulls/50)*100}%`;
+            document.getElementById('bull-count').innerText = bulls;
+            document.getElementById('bear-count').innerText = bears;
+            document.getElementById('market-status-text').innerText = bulls > 35 ? "🔥 市場極度樂觀" : (bulls < 15 ? "😨 市場極度恐慌" : "⚖️ 市場多空拉鋸");
 
             const oversoldList = document.getElementById('oversold-list');
             const breakoutList = document.getElementById('breakout-list');
@@ -89,42 +94,27 @@
                     const volumes = kData.map(d => parseFloat(d[5]));
                     const price = closes[closes.length - 1];
 
-                    // 指標計算
                     const rsi = calcRSI(closes);
                     const ema200 = calcEMA(closes, 200);
                     const avgVol = volumes.slice(-20).reduce((a,b)=>a+b)/20;
-                    const currentVol = volumes[volumes.length - 1];
-                    
-                    const volConfirm = currentVol > avgVol * 1.5; // 油量確認
-                    const isAboveEMA = price > ema200; // 坡度確認
-                    
-                    // 資金建議：單筆投入本金 15% (保護資產)
+                    const volConfirm = volumes[volumes.length - 1] > avgVol * 1.5;
+                    const isAboveEMA = price > ema200;
                     const suggestAmount = (capital * 0.15).toFixed(2);
 
-                    // 1. 撿便宜區
                     if (rsi < 32) {
                         oversoldList.innerHTML += createCard(coin.symbol, price, suggestAmount, true, volConfirm, isAboveEMA);
                     }
-                    // 2. 衝刺區
                     if (rsi > 68 && volConfirm) {
                         breakoutList.innerHTML += createCard(coin.symbol, price, suggestAmount, false, volConfirm, isAboveEMA);
                     }
 
-                    // 3. 全掃描表
-                    let mood = rsi < 32 ? "❄️ 市場極冷" : (rsi > 68 ? "🔥 市場極熱" : "☁️ 情緒一般");
-                    let moodColor = rsi < 32 ? "text-green-400" : (rsi > 68 ? "text-red-400" : "text-gray-500");
-
                     fullTbody.innerHTML += `
                         <tr class="hover:bg-gray-800">
                             <td class="p-4 font-bold text-yellow-500">${coin.symbol}</td>
-                            <td class="p-4 text-white">$${price}</td>
-                            <td class="p-4 text-center ${moodColor}">${mood}</td>
-                            <td class="p-4 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-bold">
-                                ${isAboveEMA ? '✅ 安全上坡' : '❌ 危險下坡'}
-                            </td>
-                            <td class="p-4 text-right">
-                                ${rsi < 32 ? '<span class="text-green-400">考慮撿便宜</span>' : (rsi > 68 ? '<span class="text-red-400">太熱別亂追</span>' : '等訊號出現')}
-                            </td>
+                            <td class="p-4">$${price}</td>
+                            <td class="p-4 ${rsi < 32 ? 'text-green-400' : (rsi > 68 ? 'text-red-400' : 'text-gray-500')}">${rsi.toFixed(0)}</td>
+                            <td class="p-4 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-bold">${isAboveEMA ? '✅上坡' : '❌下坡'}</td>
+                            <td class="p-4">${rsi < 32 ? '抄底' : (rsi > 68 ? '追漲' : '-')}</td>
                         </tr>`;
                 } catch(e) {}
             }
@@ -132,47 +122,39 @@
 
         function createCard(symbol, price, amount, isOversold, volConfirm, isAboveEMA) {
             const isSafe = volConfirm && isAboveEMA;
+            // 功能 2: 多階停利計算
+            const tp1 = (price * 1.04).toFixed(4);
+            const tp2 = (price * 1.08).toFixed(4);
+            const tp3 = (price * 1.15).toFixed(4);
             const stopLoss = (price * 0.97).toFixed(4);
-            const takeProfit = (price * 1.08).toFixed(4);
 
             return `
                 <div class="bg-gray-900 border-2 ${isSafe ? 'border-green-500' : 'border-yellow-600'} p-6 rounded-2xl shadow-xl">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-2xl font-black">${symbol}</h3>
-                        ${isSafe ? '<span class="bg-green-500 text-black px-2 py-1 rounded text-[10px] font-black blink">💎 黃金機會</span>' : '<span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-[10px]">⚠️ 觀察中</span>'}
-                    </div>
-                    
+                    <h3 class="text-2xl font-black mb-4">${symbol}</h3>
                     <div class="bg-yellow-500/10 border border-yellow-500/50 p-4 rounded-xl mb-4 text-center">
-                        <p class="text-[10px] text-yellow-500 font-bold mb-1">本筆推薦投入金額</p>
-                        <p class="text-3xl font-black text-white">$ ${amount} <span class="text-sm font-normal">USDT</span></p>
+                        <p class="text-[10px] text-yellow-500 font-bold mb-1">本筆推薦投入</p>
+                        <p class="text-3xl font-black text-white">$ ${amount}</p>
                     </div>
 
                     <div class="space-y-3 mb-6">
-                        <div class="flex justify-between text-sm text-gray-400"><span>目前買入價:</span><span class="text-white">$${price}</span></div>
-                        <div class="flex justify-between text-sm text-yellow-400 font-bold"><span>目標賺錢賣價:</span><span>$${takeProfit}</span></div>
-                        <div class="flex justify-between text-sm text-red-500 font-bold underline"><span>保命停損賣價:</span><span>$${stopLoss}</span></div>
+                        <div class="flex justify-between text-xs text-red-500 font-bold"><span>🚨 強制停損價:</span><span>$${stopLoss}</span></div>
+                        <div class="space-y-1 mt-4 border-t border-gray-800 pt-2">
+                            <p class="text-[10px] text-gray-500 font-bold uppercase">分批停利導航</p>
+                            <div class="flex justify-between text-xs text-green-400"><span>1. 第一站(減倉):</span><span>$${tp1}</span></div>
+                            <div class="flex justify-between text-xs text-green-500"><span>2. 第二站(獲利):</span><span>$${tp2}</span></div>
+                            <div class="flex justify-between text-xs text-green-300 font-bold"><span>3. 第三站(讓飛):</span><span>$${tp3}</span></div>
+                        </div>
                     </div>
 
-                    <div class="bg-black/50 p-4 rounded-xl text-[11px] space-y-3">
-                        <div class="flex justify-between">
-                            <span>🚦 大環境路況:</span>
-                            <b class="${isAboveEMA ? 'text-green-400' : 'text-red-500'}">
-                                ${isAboveEMA ? '✅ 安全上坡 (穩)' : '❌ 危險下坡 (別接)'}
-                            </b>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>⛽ 引擎動力:</span>
-                            <b class="${volConfirm ? 'text-green-400' : 'text-red-500'}">
-                                ${volConfirm ? '✅ 汽油充足 (真漲)' : '❌ 沒油跑不動 (假漲)'}
-                            </b>
-                        </div>
-                        <p class="text-center pt-2 border-t border-gray-800 text-xs font-black ${isSafe ? 'text-green-400' : 'text-gray-500'}">
-                            ${isSafe ? '➡️ 條件達成，可以開車！' : '➡️ 條件不足，請先熄火'}
-                        </p>
+                    <div class="bg-black/50 p-3 rounded-lg text-[10px] space-y-2">
+                        <div class="flex justify-between"><span>🚦 坡度:</span><b class="${isAboveEMA ? 'text-green-400' : 'text-red-500'}">${isAboveEMA ? '✅安全' : '❌危險'}</b></div>
+                        <div class="flex justify-between"><span>⛽ 汽油:</span><b class="${volConfirm ? 'text-green-400' : 'text-red-500'}">${volConfirm ? '✅充足' : '❌沒油'}</b></div>
+                        <p class="text-center pt-2 font-black ${isSafe ? 'text-green-400' : 'text-gray-500'}">${isSafe ? '➡️ 條件達成，進場！' : '➡️ 條件不足，觀望'}</p>
                     </div>
                 </div>`;
         }
 
+        // --- 指標數學函數 ---
         function calcRSI(prices) {
             let g=0, l=0;
             for(let i=prices.length-14; i<prices.length; i++) {
