@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Pro 終極全能導航儀</title>
+    <title>Crypto 新手保命導航儀 - 白話路況版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; }
         .tab-active { border-bottom: 4px solid #eab308; color: #eab308; }
         .calc-input { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 4px 8px; width: 120px; color: #eab308; font-weight: bold; }
-        .blink { animation: blinker 2s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0.5; } }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.3; } }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8">
@@ -18,19 +18,19 @@
     <div class="max-w-7xl mx-auto">
         <header class="mb-8 bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <h1 class="text-3xl font-black text-yellow-500 tracking-tighter italic">PRO NAVIGATOR</h1>
-                <p class="text-xs text-gray-400 mt-1">全能版：過濾假訊號 + 自動控倉</p>
+                <h1 class="text-3xl font-black text-yellow-500 tracking-tighter italic">新手交易導航儀</h1>
+                <p class="text-xs text-gray-400 mt-1">分析師提醒：先輸入你有多少錢，我幫你算每一筆買多少</p>
             </div>
             <div class="flex items-center gap-4 bg-black/50 p-4 rounded-xl border border-gray-800">
-                <label class="text-sm font-bold">💰 總本金 (USDT):</label>
+                <label class="text-sm font-bold">💰 我的總本金 (USDT):</label>
                 <input type="number" id="total-capital" value="1000" oninput="analyze()" class="calc-input text-xl">
             </div>
         </header>
 
         <nav class="flex space-x-10 mb-8 border-b border-gray-800 font-bold text-sm">
-            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-3 tab-active">❄️ 安全抄底 (極冷反彈)</button>
-            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-3 text-gray-500">🔥 真實突破 (強勢追漲)</button>
-            <button onclick="switchTab('all')" id="btn-all" class="pb-3 text-gray-500">🔍 市場情緒全掃描</button>
+            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-3 tab-active">💎 撿便宜區 (跌深等反彈)</button>
+            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-3 text-gray-500">🚀 衝刺區 (強勢追漲)</button>
+            <button onclick="switchTab('all')" id="btn-all" class="pb-3 text-gray-500">🌍 市場所有幣況</button>
         </nav>
 
         <div id="oversold-section">
@@ -44,19 +44,28 @@
         <div id="all-section" class="hidden">
             <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 text-xs">
                 <table class="w-full text-left">
-                    <thead class="bg-gray-800 text-gray-400">
+                    <thead class="bg-gray-800 text-gray-400 font-bold">
                         <tr>
-                            <th class="p-4">資產名稱</th>
+                            <th class="p-4">貨幣名稱</th>
                             <th class="p-4">目前價格</th>
-                            <th class="p-4 text-center">市場情緒</th>
-                            <th class="p-4">趨勢狀態</th>
-                            <th class="p-4 text-right">建議</th>
+                            <th class="p-4 text-center">市場熱度</th>
+                            <th class="p-4">大環境坡度</th>
+                            <th class="p-4 text-right">建議操作</th>
                         </tr>
                     </thead>
-                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono"></tbody>
+                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono text-sm"></tbody>
                 </table>
             </div>
         </div>
+
+        <footer class="mt-12 p-6 bg-red-900/10 border border-red-900/50 rounded-xl">
+            <h3 class="text-red-500 font-bold mb-2">🛑 新手保命符 (一定要記住)：</h3>
+            <ul class="text-xs text-gray-400 space-y-1">
+                <li>1. 看到「❌ 危險下坡」千萬不要買，那是在接掉下來的菜刀。</li>
+                <li>2. 看到「❌ 引擎沒油」代表沒人在買，就算漲也是假的。</li>
+                <li>3. 兩個都是「✅」才是真正的機會，但也要設停損！</li>
+            </ul>
+        </footer>
     </div>
 
     <script>
@@ -86,35 +95,35 @@
                     const avgVol = volumes.slice(-20).reduce((a,b)=>a+b)/20;
                     const currentVol = volumes[volumes.length - 1];
                     
-                    const volConfirm = currentVol > avgVol * 1.5; // 量能放大
-                    const isAboveEMA = price > ema200; // 長期多頭趨勢
+                    const volConfirm = currentVol > avgVol * 1.5; // 油量確認
+                    const isAboveEMA = price > ema200; // 坡度確認
                     
-                    // 資金建議：單筆投入本金 15% (2%風險管控)
+                    // 資金建議：單筆投入本金 15% (保護資產)
                     const suggestAmount = (capital * 0.15).toFixed(2);
 
-                    // 1. 安全抄底：超冷 + 有量
+                    // 1. 撿便宜區
                     if (rsi < 32) {
                         oversoldList.innerHTML += createCard(coin.symbol, price, suggestAmount, true, volConfirm, isAboveEMA);
                     }
-                    // 2. 真實突破：超熱 + 有量
+                    // 2. 衝刺區
                     if (rsi > 68 && volConfirm) {
                         breakoutList.innerHTML += createCard(coin.symbol, price, suggestAmount, false, volConfirm, isAboveEMA);
                     }
 
                     // 3. 全掃描表
-                    let mood = rsi < 32 ? "❄️ 極冷" : (rsi > 68 ? "🔥 極熱" : "☁️ 一般");
+                    let mood = rsi < 32 ? "❄️ 市場極冷" : (rsi > 68 ? "🔥 市場極熱" : "☁️ 情緒一般");
                     let moodColor = rsi < 32 ? "text-green-400" : (rsi > 68 ? "text-red-400" : "text-gray-500");
 
                     fullTbody.innerHTML += `
                         <tr class="hover:bg-gray-800">
                             <td class="p-4 font-bold text-yellow-500">${coin.symbol}</td>
-                            <td class="p-4 text-white font-bold">$${price}</td>
-                            <td class="p-4 text-center ${moodColor}">${mood} (${rsi.toFixed(0)})</td>
+                            <td class="p-4 text-white">$${price}</td>
+                            <td class="p-4 text-center ${moodColor}">${mood}</td>
                             <td class="p-4 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-bold">
-                                ${isAboveEMA ? '📈 多頭趨勢' : '📉 空頭趨勢'}
+                                ${isAboveEMA ? '✅ 安全上坡' : '❌ 危險下坡'}
                             </td>
-                            <td class="p-4 text-right ${volConfirm ? 'text-yellow-500' : 'text-gray-600'}">
-                                ${volConfirm ? '🔥 主力進場' : '成交一般'}
+                            <td class="p-4 text-right">
+                                ${rsi < 32 ? '<span class="text-green-400">考慮撿便宜</span>' : (rsi > 68 ? '<span class="text-red-400">太熱別亂追</span>' : '等訊號出現')}
                             </td>
                         </tr>`;
                 } catch(e) {}
@@ -127,25 +136,39 @@
             const takeProfit = (price * 1.08).toFixed(4);
 
             return `
-                <div class="bg-gray-900 border-2 ${isSafe ? 'border-green-500' : 'border-yellow-600'} p-6 rounded-2xl shadow-xl relative">
-                    ${isSafe ? '<div class="absolute -top-2 -right-2 bg-green-500 text-black px-3 py-1 rounded-full text-[10px] font-black blink">高勝率推薦</div>' : ''}
-                    <h3 class="text-2xl font-black mb-1">${symbol}</h3>
-                    <div class="text-[10px] text-gray-500 mb-4">${isOversold ? '💡 抄底模式' : '⚡ 突破模式'}</div>
+                <div class="bg-gray-900 border-2 ${isSafe ? 'border-green-500' : 'border-yellow-600'} p-6 rounded-2xl shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-black">${symbol}</h3>
+                        ${isSafe ? '<span class="bg-green-500 text-black px-2 py-1 rounded text-[10px] font-black blink">💎 黃金機會</span>' : '<span class="bg-gray-700 text-gray-300 px-2 py-1 rounded text-[10px]">⚠️ 觀察中</span>'}
+                    </div>
                     
                     <div class="bg-yellow-500/10 border border-yellow-500/50 p-4 rounded-xl mb-4 text-center">
-                        <p class="text-[10px] text-yellow-500 font-bold uppercase mb-1">建議單筆投入量</p>
+                        <p class="text-[10px] text-yellow-500 font-bold mb-1">本筆推薦投入金額</p>
                         <p class="text-3xl font-black text-white">$ ${amount} <span class="text-sm font-normal">USDT</span></p>
                     </div>
 
-                    <div class="space-y-3 text-sm mb-6">
-                        <div class="flex justify-between"><span>進場價:</span><span class="text-white font-mono">$${price}</span></div>
-                        <div class="flex justify-between text-yellow-400"><span>目標獲利:</span><span class="font-mono">$${takeProfit}</span></div>
-                        <div class="flex justify-between text-red-500 font-bold underline"><span>強制停損:</span><span class="font-mono">$${stopLoss}</span></div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm text-gray-400"><span>目前買入價:</span><span class="text-white">$${price}</span></div>
+                        <div class="flex justify-between text-sm text-yellow-400 font-bold"><span>目標賺錢賣價:</span><span>$${takeProfit}</span></div>
+                        <div class="flex justify-between text-sm text-red-500 font-bold underline"><span>保命停損賣價:</span><span>$${stopLoss}</span></div>
                     </div>
 
-                    <div class="bg-black/50 p-3 rounded-lg text-[10px] text-gray-400 space-y-1">
-                        <p>大戶動向: ${volConfirm ? '✅ 成交量放大' : '❌ 量能平淡'}</p>
-                        <p>長期趨勢: ${isAboveEMA ? '✅ EMA200 以上' : '❌ EMA200 以下'}</p>
+                    <div class="bg-black/50 p-4 rounded-xl text-[11px] space-y-3">
+                        <div class="flex justify-between">
+                            <span>🚦 大環境路況:</span>
+                            <b class="${isAboveEMA ? 'text-green-400' : 'text-red-500'}">
+                                ${isAboveEMA ? '✅ 安全上坡 (穩)' : '❌ 危險下坡 (別接)'}
+                            </b>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>⛽ 引擎動力:</span>
+                            <b class="${volConfirm ? 'text-green-400' : 'text-red-500'}">
+                                ${volConfirm ? '✅ 汽油充足 (真漲)' : '❌ 沒油跑不動 (假漲)'}
+                            </b>
+                        </div>
+                        <p class="text-center pt-2 border-t border-gray-800 text-xs font-black ${isSafe ? 'text-green-400' : 'text-gray-500'}">
+                            ${isSafe ? '➡️ 條件達成，可以開車！' : '➡️ 條件不足，請先熄火'}
+                        </p>
                     </div>
                 </div>`;
         }
@@ -178,7 +201,7 @@
         }
 
         window.onload = analyze;
-        setInterval(analyze, 300000); // 5分鐘自動更新
+        setInterval(analyze, 300000);
     </script>
 </body>
 </html>
