@@ -3,71 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Pro 導航儀 - Telegram 實時通知版</title>
+    <title>🍀 韭菜保命符 - Crypto 自動導航儀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; }
-        .tab-active { border-bottom: 4px solid #eab308; color: #eab308; }
-        .calc-input { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 4px 8px; width: 120px; color: #eab308; font-weight: bold; }
+        .tab-active { border-bottom: 4px solid #eab308; color: #eab308; font-weight: 900; }
+        .calc-input { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 6px 10px; color: #eab308; font-weight: bold; transition: all 0.3s; }
+        .calc-input:focus { border-color: #eab308; outline: none; box-shadow: 0 0 10px rgba(234, 179, 8, 0.2); }
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
+        .card-gradient { background: linear-gradient(145deg, #111111 0%, #050505 100%); }
+        /* 霓虹燈效果 */
+        .neon-text { text-shadow: 0 0 10px rgba(234, 179, 8, 0.8), 0 0 20px rgba(234, 179, 8, 0.4); }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto">
-        <section class="mb-6 bg-gray-900/50 p-4 rounded-xl border border-gray-800">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="text-xs font-bold text-gray-400">🌍 全市場路況統計 (前50大幣種)</h3>
-                <div class="flex items-center gap-2">
-                    <span id="tg-status" class="text-[10px] bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded border border-blue-800">TG 守護中</span>
-                    <span id="market-status-text" class="text-xs font-bold">掃描中...</span>
-                </div>
-            </div>
-            <div class="w-full bg-red-900/30 h-4 rounded-full overflow-hidden flex">
-                <div id="bull-bar" class="bg-green-500 h-full transition-all duration-500" style="width: 50%"></div>
-                <div id="bear-bar" class="bg-red-500 h-full transition-all duration-500" style="width: 50%"></div>
-            </div>
-        </section>
-
-        <header class="mb-8 bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-                <h1 class="text-3xl font-black text-yellow-500 tracking-tighter italic">新手交易導航儀</h1>
-                <p class="text-xs text-gray-400 mt-1">功能：路況掃描 | 分批停利 | Telegram 實時通知</p>
-            </div>
-            <div class="flex items-center gap-4 bg-black/50 p-4 rounded-xl border border-gray-800">
-                <label class="text-sm font-bold">💰 總本金 (USDT):</label>
-                <input type="number" id="total-capital" value="30" oninput="analyze()" class="calc-input text-xl">
-            </div>
-        </header>
-
-        <nav class="flex space-x-10 mb-8 border-b border-gray-800 font-bold text-sm">
-            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-3 tab-active">💎 撿便宜區</button>
-            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-3 text-gray-500">🚀 衝刺區</button>
-            <button onclick="switchTab('all')" id="btn-all" class="pb-3 text-gray-500">🔍 市場全掃描</button>
-        </nav>
-
-        <div id="oversold-section"><div id="oversold-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div></div>
-        <div id="breakout-section" class="hidden"><div id="breakout-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div></div>
-        <div id="all-section" class="hidden">
-            <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
-                <table class="w-full text-left text-xs"><tbody id="full-tbody" class="divide-y divide-gray-800"></tbody></table>
-            </div>
+    <div class="fixed top-2 right-4 z-50 pointer-events-none select-none">
+        <div class="flex flex-col items-end">
+            <span class="text-[8px] font-black text-gray-700 tracking-[0.2em] uppercase">System Architect</span>
+            <span class="text-xs font-black text-yellow-500 italic neon-text">
+                BY PROTECTOR K
+            </span>
         </div>
     </div>
 
-    <script>
-        // ======= [核心設定：請填寫你的 Telegram 資訊] =======
-        const TG_TOKEN = '8553267999:AAH7HNz5If0I52bjxLpbrufB-eAqZ8kSTi0'; 
-        const TG_CHAT_ID = '5671018133'; 
-        // =================================================
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-2xl shadow-2xl">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div>
+                    <h1 class="text-4xl font-black text-yellow-500 tracking-tighter italic flex items-center gap-2">
+                        <span>🍀</span> 韭菜保命符
+                    </h1>
+                    <p class="text-xs text-gray-400 mt-2 font-bold tracking-widest uppercase">Leek Protector v2.1 | 守護本金是唯一真理</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full lg:w-auto bg-black/40 p-5 rounded-2xl border border-gray-800">
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-500 block">💰 我的總本金 (USDT)</label>
+                        <input type="number" id="total-capital" placeholder="例如: 1000" oninput="saveAndAnalyze()" class="calc-input w-full text-xl">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-gray-500 block">🤖 TG 通知設定 (隱私加密)</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="tg-token" placeholder="TG Token" oninput="saveAndAnalyze()" class="calc-input text-xs w-full">
+                            <input type="text" id="tg-id" placeholder="Chat ID" oninput="saveAndAnalyze()" class="calc-input text-xs w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-        let sentSignals = new Set(); // 用來防止重複發送通知
+        <section class="mb-8 bg-gray-900/50 p-5 rounded-2xl border border-gray-800">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-black text-gray-400">🌍 全球路況統計 (全市場情緒)</h3>
+                <span id="market-status-text" class="text-xs font-bold px-3 py-1 rounded-full bg-black">掃描中...</span>
+            </div>
+            <div class="w-full bg-gray-800 h-5 rounded-full overflow-hidden flex shadow-inner">
+                <div id="bull-bar" class="bg-gradient-to-r from-green-600 to-green-400 h-full transition-all duration-1000" style="width: 50%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] mt-2 text-gray-500 font-bold">
+                <span>🟢 漲勢家數: <span id="bull-count">0</span></span>
+                <span>🔴 跌勢家數: <span id="bear-count">0</span></span>
+            </div>
+        </section>
+
+        <nav class="flex space-x-12 mb-8 border-b border-gray-800 font-black text-sm text-gray-500">
+            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-4 tab-active transition-all">💎 撿便宜區</button>
+            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-4 hover:text-gray-300">🚀 強勢衝刺區</button>
+            <button onclick="switchTab('all')" id="btn-all" class="pb-4 hover:text-gray-300">🔍 全球掃描</button>
+        </nav>
+
+        <div id="oversold-section"><div id="oversold-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div></div>
+        <div id="breakout-section" class="hidden"><div id="breakout-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div></div>
+        <div id="all-section" class="hidden">
+            <div class="bg-gray-900 rounded-3xl overflow-hidden border border-gray-800 shadow-2xl">
+                <table class="w-full text-left text-xs font-bold">
+                    <thead class="bg-gray-800/50 text-gray-400 uppercase">
+                        <tr><th class="p-5">貨幣</th><th class="p-5">目前價格</th><th class="p-5">路況坡度</th><th class="p-5">大戶動力</th></tr>
+                    </thead>
+                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="mt-16 p-8 bg-red-950/20 border border-red-900/30 rounded-3xl text-center">
+            <p class="text-red-500 font-black mb-2 italic">⚠️ 韭菜警語：系統僅供參考，請嚴格執行停損，不要與趨勢作對。</p>
+            <p class="text-gray-600 text-[10px]">Protector K Engineering | 韭菜保命符 v2.1</p>
+        </footer>
+    </div>
+
+    <script>
+        let sentSignals = new Set();
+
+        window.onload = () => {
+            document.getElementById('total-capital').value = localStorage.getItem('capital') || 1000;
+            document.getElementById('tg-token').value = localStorage.getItem('tgToken') || '';
+            document.getElementById('tg-id').value = localStorage.getItem('tgId') || '';
+            analyze();
+        };
+
+        function saveAndAnalyze() {
+            localStorage.setItem('capital', document.getElementById('total-capital').value);
+            localStorage.setItem('tgToken', document.getElementById('tg-token').value);
+            localStorage.setItem('tgId', document.getElementById('tg-id').value);
+            analyze();
+        }
 
         async function sendToTelegram(message) {
-            if (TG_TOKEN.includes('你的')) return; // 若沒設定則不執行
-            const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(message)}`;
-            try { await fetch(url); } catch (e) { console.error("TG 發送失敗", e); }
+            const token = document.getElementById('tg-token').value;
+            const chatId = document.getElementById('tg-id').value;
+            if (!token || !chatId) return;
+            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            try { await fetch(url); } catch (e) { console.error("TG 發送失敗"); }
         }
 
         async function analyze() {
@@ -78,7 +126,9 @@
 
             const bulls = top50.filter(c => parseFloat(c.priceChangePercent) > 0).length;
             document.getElementById('bull-bar').style.width = `${(bulls/50)*100}%`;
-            document.getElementById('market-status-text').innerText = bulls > 30 ? "⚖️ 多頭佔優" : "⚖️ 空頭佔優";
+            document.getElementById('bull-count').innerText = bulls;
+            document.getElementById('bear-count').innerText = 50 - bulls;
+            document.getElementById('market-status-text').innerText = bulls > 25 ? "📈 多頭佔優" : "📉 空頭主導";
 
             const lists = { oversold: document.getElementById('oversold-list'), breakout: document.getElementById('breakout-list') };
             lists.oversold.innerHTML = ''; lists.breakout.innerHTML = '';
@@ -96,29 +146,29 @@
                     const ema200 = calcEMA(closes, 200);
                     const isAboveEMA = price > ema200;
                     const volConfirm = volumes[volumes.length - 1] > (volumes.slice(-20).reduce((a,b)=>a+b)/20) * 1.5;
-                    const suggestAmount = (capital * 0.15).toFixed(2);
                     const isSafe = volConfirm && isAboveEMA;
+                    const suggestAmount = (capital * 0.15).toFixed(2);
 
-                    // 1. 處理通知邏輯
-                    if (isSafe && (rsi < 32 || rsi > 68)) {
-                        if (!sentSignals.has(coin.symbol)) {
-                            const msg = `💎 黃金機會！\n幣種：${coin.symbol}\n價錢：$${price}\n建議買入：$${suggestAmount} USDT\n路況：${isAboveEMA?'✅上坡':'❌下坡'}\n油量：${volConfirm?'✅充足':'❌沒油'}`;
-                            sendToTelegram(msg);
-                            sentSignals.add(coin.symbol);
-                            setTimeout(() => sentSignals.delete(coin.symbol), 3600000); // 一小時後可再次通知
-                        }
+                    if (isSafe && (rsi < 32 || rsi > 68) && !sentSignals.has(coin.symbol)) {
+                        const stop = (price * 0.97).toFixed(4);
+                        const tp1 = (price * 1.04).toFixed(4);
+                        const tp2 = (price * 1.08).toFixed(4);
+                        const msg = `🍀 韭菜保命符：發現機會！\n\n幣種：${coin.symbol}\n進場：$${price}\n建議：$${suggestAmount} USDT\n\n🛑 止損：$${stop}\n🎯 目標1：$${tp1}\n🎯 目標2：$${tp2}\n\nBY PROTECTOR K`;
+                        sendToTelegram(msg);
+                        sentSignals.add(coin.symbol);
+                        setTimeout(() => sentSignals.delete(coin.symbol), 3600000);
                     }
 
-                    // 2. 渲染 UI
                     const cardHtml = createCard(coin.symbol, price, suggestAmount, rsi < 32, volConfirm, isAboveEMA);
                     if (rsi < 32) lists.oversold.innerHTML += cardHtml;
                     if (rsi > 68 && volConfirm) lists.breakout.innerHTML += cardHtml;
 
                     document.getElementById('full-tbody').innerHTML += `
-                        <tr class="p-4 border-b border-gray-800">
-                            <td class="p-4 font-bold text-yellow-500">${coin.symbol}</td>
-                            <td class="p-4">$${price}</td>
-                            <td class="p-4 ${isAboveEMA?'text-green-500':'text-red-500'}">${isAboveEMA?'✅安全':'❌危險'}</td>
+                        <tr class="hover:bg-gray-800/30 transition-colors">
+                            <td class="p-5 font-black text-yellow-500">${coin.symbol}</td>
+                            <td class="p-5 font-bold">$${price}</td>
+                            <td class="p-5 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-black">${isAboveEMA ? '✅ 安全' : '❌ 危險'}</td>
+                            <td class="p-5 ${volConfirm ? 'text-green-500' : 'text-gray-600'}">${volConfirm ? '🔥 充足' : '平淡'}</td>
                         </tr>`;
                 } catch(e) {}
             }
@@ -126,23 +176,27 @@
 
         function createCard(symbol, price, amount, isOversold, volConfirm, isAboveEMA) {
             const isSafe = volConfirm && isAboveEMA;
-            const tp1 = (price * 1.04).toFixed(4);
-            const stop = (price * 0.97).toFixed(4);
             return `
-                <div class="bg-gray-900 border-2 ${isSafe ? 'border-green-500 shadow-green-900/20' : 'border-yellow-600'} p-6 rounded-2xl shadow-xl relative overflow-hidden">
-                    ${isSafe ? '<div class="absolute top-0 right-0 bg-green-500 text-black px-4 py-1 text-[10px] font-black blink italic">RECOMMENDED</div>' : ''}
-                    <h3 class="text-2xl font-black mb-4">${symbol}</h3>
-                    <div class="bg-yellow-500/10 border border-yellow-500/50 p-4 rounded-xl mb-6">
-                        <p class="text-[10px] text-yellow-500 font-bold mb-1">💰 推薦投入金額</p>
-                        <p class="text-3xl font-black">$ ${amount}</p>
+                <div class="card-gradient border-2 ${isSafe ? 'border-green-500 shadow-2xl shadow-green-900/20' : 'border-gray-800'} p-7 rounded-[2rem] relative overflow-hidden transition-all hover:scale-[1.02]">
+                    ${isSafe ? '<div class="absolute top-0 right-0 bg-green-500 text-black px-5 py-1 text-[10px] font-black blink italic tracking-tighter uppercase">Protector Recommended</div>' : ''}
+                    <h3 class="text-3xl font-black mb-5 tracking-tighter text-white">${symbol}</h3>
+                    <div class="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-2xl mb-6 text-center">
+                        <p class="text-[10px] text-yellow-500 font-black mb-1">推薦投入金額</p>
+                        <p class="text-3xl font-black text-yellow-500">$ ${amount}</p>
                     </div>
-                    <div class="space-y-3 text-sm mb-6 border-b border-gray-800 pb-4">
-                        <div class="flex justify-between text-red-500 font-bold italic"><span>🚨 保命停損:</span><span>$${stop}</span></div>
-                        <div class="flex justify-between text-green-400"><span>✅ 第一站停利:</span><span>$${tp1}</span></div>
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between items-center bg-red-950/30 p-3 rounded-xl">
+                            <span class="text-xs text-red-500 font-black">🛑 停損:</span>
+                            <span class="text-sm font-mono text-red-500 font-black">$${(price*0.97).toFixed(4)}</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-green-950/30 p-3 rounded-xl">
+                            <span class="text-xs text-green-500 font-black">🎯 獲利:</span>
+                            <span class="text-sm font-mono text-green-400 font-black">$${(price*1.05).toFixed(4)}</span>
+                        </div>
                     </div>
-                    <div class="bg-black/40 p-3 rounded-lg text-[11px] space-y-2">
-                        <div class="flex justify-between"><span>🚦 大環境:</span><b class="${isAboveEMA?'text-green-500':'text-red-500'}">${isAboveEMA?'安全上坡':'危險下坡'}</b></div>
-                        <div class="flex justify-between"><span>⛽ 引擎動力:</span><b class="${volConfirm?'text-green-500':'text-red-500'}">${volConfirm?'動力充足':'動力不足'}</b></div>
+                    <div class="flex justify-between text-[10px] font-black opacity-60">
+                        <span>🚥 路況: ${isAboveEMA?'✅':'❌'}</span>
+                        <span>⛽ 動力: ${volConfirm?'🔥':'☁️'}</span>
                     </div>
                 </div>`;
         }
@@ -166,13 +220,11 @@
         function switchTab(tab) {
             ['oversold', 'breakout', 'all'].forEach(t => {
                 document.getElementById(`${t}-section`).classList.toggle('hidden', t !== tab);
-                document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
-                document.getElementById(`btn-${t}`).classList.toggle('text-gray-500', t !== tab);
+                document.getElementById(`btn-${t}`).className = `pb-4 ${t === tab ? 'tab-active' : 'text-gray-500 hover:text-gray-300'}`;
             });
         }
 
-        window.onload = analyze;
-        setInterval(analyze, 300000); // 5分鐘刷新一次
+        setInterval(analyze, 300000);
     </script>
 </body>
 </html>
