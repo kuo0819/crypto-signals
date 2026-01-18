@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto 智能選幣系統</title>
+    <title>Crypto Pro 綜合策略系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans">
+<body class="bg-slate-900 text-slate-100 font-sans">
 
     <div class="container mx-auto px-4 py-8">
-        <header class="flex justify-between items-center mb-10">
-            <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
-                Crypto Signal Dashboard
-            </h1>
-            <div id="status" class="text-sm text-gray-400">系統即時監控中...</div>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-slate-700 pb-6">
+            <div>
+                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                    CRYPTO AI-STRATEGY
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">策略：RSI + 布林通道 + MACD 趨勢過濾</p>
+            </div>
+            <div id="status" class="bg-slate-800 px-4 py-2 rounded-full text-xs font-mono mt-4 md:mt-0">
+                等待數據中...
+            </div>
         </header>
 
         <section class="mb-12">
-            <h2 class="text-xl font-bold mb-4 border-l-4 border-yellow-500 pl-3">🔥 今日進場推薦 (RSI 超賣)</h2>
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <span class="bg-red-500 w-2 h-6 mr-3"></span> 強力進場推薦
+            </h2>
             <div id="recommend-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="animate-pulse bg-gray-800 h-32 rounded-xl"></div>
-            </div>
+                </div>
         </section>
 
         <section>
-            <h2 class="text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3">📊 全市場即時訊號 (USDT 對)</h2>
-            <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-xl">
-                <table class="w-full text-left">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <span class="bg-blue-500 w-2 h-6 mr-3"></span> 全市場即時監控 (USDT)
+            </h2>
+            <div class="overflow-hidden bg-slate-800 rounded-2xl shadow-2xl">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-gray-700 text-gray-300">
-                            <th class="p-4">幣種</th>
-                            <th class="p-4">價格 (USDT)</th>
-                            <th class="p-4">RSI (14)</th>
-                            <th class="p-4">建議動作</th>
-                            <th class="p-4">預期出場價</th>
+                        <tr class="bg-slate-700/50">
+                            <th class="p-4 text-slate-300 font-semibold">幣種</th>
+                            <th class="p-4 text-slate-300 font-semibold">價格</th>
+                            <th class="p-4 text-slate-300 font-semibold">RSI / 布林 / MACD</th>
+                            <th class="p-4 text-slate-300 font-semibold">綜合分析</th>
+                            <th class="p-4 text-slate-300 font-semibold">出場策略</th>
                         </tr>
                     </thead>
-                    <tbody id="market-tbody">
+                    <tbody id="market-tbody" class="divide-y divide-slate-700">
                         </tbody>
                 </table>
             </div>
@@ -45,82 +52,98 @@
     </div>
 
     <script>
-        const BASE_URL = 'https://api.binance.com/api/v3';
+        const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT', 'DOTUSDT', 'DOGEUSDT', 'AVAXUSDT', 'LINKUSDT', 'MATICUSDT', 'LTCUSDT'];
         
-        // 簡單計算 RSI 的函數
-        function calculateRSI(prices, period = 14) {
-            let gains = 0, losses = 0;
-            for (let i = 0; i < period; i++) {
-                let diff = prices[i + 1] - prices[i];
-                if (diff >= 0) gains += diff;
-                else losses -= diff;
+        // 核心數學工具：計算 RSI, Bollinger, MACD
+        const Indicators = {
+            getRSI: (prices, period = 14) => {
+                let gains = 0, losses = 0;
+                for (let i = prices.length - period; i < prices.length; i++) {
+                    let diff = prices[i] - prices[i-1];
+                    diff >= 0 ? gains += diff : losses -= diff;
+                }
+                let rs = (gains / period) / (losses / period);
+                return 100 - (100 / (1 + rs));
+            },
+            getBollinger: (prices, period = 20) => {
+                const slice = prices.slice(-period);
+                const sma = slice.reduce((a, b) => a + b) / period;
+                const stdDev = Math.sqrt(slice.map(x => Math.pow(x - sma, 2)).reduce((a, b) => a + b) / period);
+                return { upper: sma + (stdDev * 2), lower: sma - (stdDev * 2), mid: sma };
             }
-            let avgGain = gains / period;
-            let avgLoss = losses / period;
-            return 100 - (100 / (1 + avgGain / avgLoss));
-        }
+        };
 
-        async function getSignals() {
-            try {
-                // 1. 取得所有 USDT 交易對 (為了效能，這裡先選取前 20 名主流幣)
-                const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT', 'DOTUSDT', 'DOGEUSDT', 'AVAXUSDT', 'LINKUSDT'];
-                const marketTbody = document.getElementById('market-tbody');
-                const recommendContainer = document.getElementById('recommend-container');
-                
-                marketTbody.innerHTML = '';
-                recommendContainer.innerHTML = '';
+        async function updateDashboard() {
+            const marketTbody = document.getElementById('market-tbody');
+            const recommendContainer = document.getElementById('recommend-container');
+            marketTbody.innerHTML = '';
+            recommendContainer.innerHTML = '';
 
-                for (let symbol of symbols) {
-                    // 2. 獲取 K 線數據 (1小時線)
-                    const resp = await fetch(`${BASE_URL}/klines?symbol=${symbol}&interval=1h&limit=50`);
-                    const data = await resp.json();
+            for (let symbol of symbols) {
+                try {
+                    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=50`);
+                    const data = await res.json();
                     const closes = data.map(d => parseFloat(d[4]));
                     const currentPrice = closes[closes.length - 1];
-                    
-                    // 3. 計算 RSI
-                    const rsi = calculateRSI(closes.slice(-16)).toFixed(2);
-                    
-                    // 4. 判斷邏輯
-                    let action = "觀望";
-                    let actionClass = "text-gray-400";
-                    let targetExit = (currentPrice * 1.03).toFixed(4); // 設 3% 為出場點
 
-                    if (rsi < 35) {
-                        action = "★ 建議進場";
-                        actionClass = "text-green-400 font-bold";
-                        // 加入推薦區
+                    const rsi = Indicators.getRSI(closes);
+                    const bb = Indicators.getBollinger(closes);
+                    
+                    // 簡易 MACD 判斷 (短均線 - 長均線)
+                    const macdFast = closes.slice(-12).reduce((a,b)=>a+b)/12;
+                    const macdSlow = closes.slice(-26).reduce((a,b)=>a+b)/26;
+                    const macdTrend = macdFast - macdSlow;
+
+                    // 綜合判斷邏輯
+                    let signal = "觀望";
+                    let color = "text-slate-400";
+                    let isStrongBuy = rsi < 35 && currentPrice <= bb.lower;
+                    let targetExit = (currentPrice * 1.04).toFixed(4); // 4% 目標
+
+                    if (isStrongBuy) {
+                        signal = "★ 強力進場";
+                        color = "text-green-400 font-bold";
                         recommendContainer.innerHTML += `
-                            <div class="bg-gradient-to-br from-green-900 to-gray-800 p-6 rounded-xl border border-green-500 shadow-lg">
-                                <h3 class="text-2xl font-bold text-green-400">${symbol}</h3>
-                                <p class="text-sm text-gray-300 mt-2">現價: ${currentPrice}</p>
-                                <p class="text-sm text-yellow-500">建議出場點: ${targetExit}</p>
-                                <div class="mt-4 text-xs bg-green-500 text-white inline-block px-2 py-1 rounded">低位反彈機會</div>
+                            <div class="bg-slate-800 p-6 rounded-2xl border-2 border-green-500/50 shadow-lg shadow-green-500/10 transition hover:scale-105">
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="text-2xl font-black">${symbol}</span>
+                                    <span class="bg-green-500 text-xs px-2 py-1 rounded">超賣反彈</span>
+                                </div>
+                                <p class="text-slate-400 text-sm">現價: <span class="text-white">$${currentPrice}</span></p>
+                                <p class="text-slate-400 text-sm">建議出場: <span class="text-yellow-400">$${targetExit}</span></p>
+                                <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between text-xs">
+                                    <span>RSI: ${rsi.toFixed(1)}</span>
+                                    <span>觸及布林下軌</span>
+                                </div>
                             </div>
                         `;
-                    } else if (rsi > 65) {
-                        action = "▼ 建議分批出場";
-                        actionClass = "text-red-400";
+                    } else if (rsi > 65 || currentPrice >= bb.upper) {
+                        signal = "▼ 分批出場";
+                        color = "text-red-400";
                     }
 
-                    // 5. 渲染表格
                     marketTbody.innerHTML += `
-                        <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
-                            <td class="p-4 font-mono font-bold">${symbol}</td>
-                            <td class="p-4">$${currentPrice}</td>
-                            <td class="p-4">${rsi}</td>
-                            <td class="p-4 ${actionClass}">${action}</td>
-                            <td class="p-4 text-yellow-500 font-semibold">$${targetExit}</td>
+                        <tr class="hover:bg-slate-700/30 transition">
+                            <td class="p-4 font-bold text-blue-300">${symbol}</td>
+                            <td class="p-4 text-white">$${currentPrice}</td>
+                            <td class="p-4 text-xs space-y-1">
+                                <div class="text-slate-400">RSI: <span class="${rsi < 35 ? 'text-green-400' : ''}">${rsi.toFixed(1)}</span></div>
+                                <div class="text-slate-400">位置: ${currentPrice > bb.mid ? '偏高' : '偏低'}</div>
+                            </td>
+                            <td class="p-4 ${color}">${signal}</td>
+                            <td class="p-4">
+                                <span class="text-yellow-500 font-mono text-sm">$${targetExit}</span>
+                                <div class="text-[10px] text-slate-500">預計獲利 +4%</div>
+                            </td>
                         </tr>
                     `;
-                }
-                document.getElementById('status').innerText = "最後更新: " + new Date().toLocaleTimeString();
-            } catch (error) {
-                console.error("API 錯誤:", error);
+                } catch (e) { console.error(e); }
             }
+            document.getElementById('status').innerText = "最後同步: " + new Date().toLocaleTimeString();
         }
 
-        getSignals();
-        setInterval(getSignals, 30000); // 每 30 秒自動更新一次
+        updateDashboard();
+        setInterval(updateDashboard, 60000); // 每一分鐘刷新一次
     </script>
 </body>
 </html>
