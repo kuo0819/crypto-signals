@@ -3,182 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加密貨幣新手投資決策導航</title>
+    <title>Crypto Pro 智能策略導航</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; }
-        .blink-border { animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { border-color: #ef4444; box-shadow: 0 0 10px #ef4444; } 50% { border-color: #475569; box-shadow: none; } 100% { border-color: #ef4444; box-shadow: 0 0 10px #ef4444; } }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #0a0a0a; }
+        .tab-active { border-bottom: 4px solid #eab308; color: #eab308; }
+        .strategy-card { transition: transform 0.2s; }
+        .strategy-card:hover { transform: translateY(-5px); }
     </style>
 </head>
-<body class="bg-gray-950 text-white p-4">
+<body class="text-slate-100">
 
-    <header class="max-w-6xl mx-auto mb-6 border-b border-yellow-600 pb-4">
-        <h1 class="text-3xl font-bold text-yellow-500 text-center md:text-left">專業操盤手決策系統 (新手專用版)</h1>
-        <p class="text-gray-400 text-sm mt-2 text-center md:text-left">自動監控市場前 50 名大交易量貨幣，找尋「超跌反彈」機會</p>
-    </header>
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+        <header class="mb-8 border-b border-gray-800 pb-6 text-center">
+            <h1 class="text-4xl font-black text-yellow-500 mb-2">PRO 策略導航儀</h1>
+            <p class="text-red-500 font-bold animate-pulse">⚠️ 軍規：合約嚴禁超過 3-5 倍槓桿 | 嚴格執行停損 ⚠️</p>
+        </header>
 
-    <main class="max-w-6xl mx-auto">
-        <section id="trading-rules" class="mb-8 bg-gray-900 border-l-8 border-yellow-600 p-5 rounded-r-lg shadow-lg">
-            <h2 class="text-xl font-bold text-yellow-500 mb-3 underline">⚠️ 新手保命三條鐵律 (一定要看)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div class="bg-black/40 p-3 rounded border border-gray-800">
-                    <b class="text-yellow-400 block mb-1">1. 沒訊號不進場</b>
-                    <span>下方出現「進場建議」才考慮，禁止憑感覺買幣。</span>
-                </div>
-                <div class="bg-black/40 p-3 rounded border border-gray-800">
-                    <b class="text-red-500 block mb-1">2. 停損要果斷</b>
-                    <span>跌到系統標註的「停損價」一定要賣，不能等它漲回來。</span>
-                </div>
-                <div class="bg-black/40 p-3 rounded border border-gray-800">
-                    <b class="text-blue-400 block mb-1">3. 分散投錢</b>
-                    <span>不要一次把錢全部投在同一個幣上，至少分三份。</span>
-                </div>
-            </div>
-        </section>
+        <nav class="flex justify-center space-x-8 mb-10 text-lg font-bold">
+            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-2 tab-active">🟢 超跌抄底</button>
+            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-2 text-gray-500">🔴 強勢突破</button>
+            <button onclick="switchTab('all')" id="btn-all" class="pb-2 text-gray-500">🔍 全市場監控</button>
+        </nav>
 
-        <section class="mb-10">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-red-500">🔥 獵物出現：今日進場建議</h2>
-                <span id="update-time" class="text-xs text-gray-500 italic">正在掃描市場...</span>
-            </div>
-            <div id="top-picks" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            <div id="no-signal" class="hidden p-8 bg-gray-900/50 rounded-xl text-center text-gray-500 border border-dashed border-gray-700">
-                目前 50 個主要幣種都沒出現「超跌反彈」訊號，請繼續耐心等待。
-            </div>
-        </section>
+        <div id="oversold-section">
+            <h3 class="text-xl mb-4 text-green-400 font-bold border-l-4 border-green-400 pl-3">目前符合「超跌反彈」的幣種</h3>
+            <div id="oversold-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </div>
 
-        <section>
-            <h2 class="text-xl font-bold mb-4 text-blue-400">📊 50 強貨幣即時狀態</h2>
-            <div class="bg-gray-900 rounded-lg overflow-hidden border border-gray-800">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-800 text-gray-300">
-                        <tr>
-                            <th class="p-3">貨幣名稱</th>
-                            <th class="p-3">目前價格</th>
-                            <th class="p-3 text-center">市場熱度(RSI)</th>
-                            <th class="p-3">決策建議</th>
-                            <th class="p-3 text-right">目標(停利/停損)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="market-list" class="divide-y divide-gray-800 font-mono">
-                        </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+        <div id="breakout-section" class="hidden">
+            <h3 class="text-xl mb-4 text-red-400 font-bold border-l-4 border-red-400 pl-3">目前符合「強勢突破」的幣種</h3>
+            <div id="breakout-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="all-section" class="hidden text-sm">
+            <table class="w-full bg-gray-900 rounded-lg overflow-hidden">
+                <thead class="bg-gray-800">
+                    <tr>
+                        <th class="p-4">貨幣</th>
+                        <th class="p-4">價格</th>
+                        <th class="p-4">熱度(RSI)</th>
+                        <th class="p-4">狀態</th>
+                    </tr>
+                </thead>
+                <tbody id="full-market-tbody" class="divide-y divide-gray-800"></tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
-        async function runAnalysis() {
-            const list = document.getElementById('market-list');
-            const picks = document.getElementById('top-picks');
-            const rules = document.getElementById('trading-rules');
+        const symbols = []; // 會由 API 自動抓取前 50 名
+        let currentTab = 'oversold';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['oversold', 'breakout', 'all'].forEach(t => {
+                document.getElementById(`${t}-section`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
+                document.getElementById(`btn-${t}`).classList.toggle('text-gray-500', t !== tab);
+            });
+            fetchData();
+        }
+
+        async function fetchData() {
+            const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+            const tickerData = await tickerRes.json();
+            const top50 = tickerData
+                .filter(d => d.symbol.endsWith('USDT'))
+                .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
+                .slice(0, 50);
+
+            const oversoldList = document.getElementById('oversold-list');
+            const breakoutList = document.getElementById('breakout-list');
+            const fullTbody = document.getElementById('full-market-tbody');
             
-            try {
-                // 獲取前 50 名交易量的 USDT 交易對
-                const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
-                const allData = await tickerRes.json();
-                const top50 = allData
-                    .filter(d => d.symbol.endsWith('USDT'))
-                    .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-                    .slice(0, 50);
+            oversoldList.innerHTML = '';
+            breakoutList.innerHTML = '';
+            fullTbody.innerHTML = '';
 
-                list.innerHTML = '';
-                picks.innerHTML = '';
-                let hasSignal = false;
+            for (let coin of top50) {
+                try {
+                    const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=50`);
+                    const kData = await kRes.json();
+                    const closes = kData.map(d => parseFloat(d[4]));
+                    const price = closes[closes.length - 1];
+                    const rsi = calcRSI(closes);
+                    const bb = calcBB(closes);
 
-                for (let i = 0; i < top50.length; i++) {
-                    const coin = top50[i];
-                    try {
-                        const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=30`);
-                        const kData = await kRes.json();
-                        const closes = kData.map(d => parseFloat(d[4]));
-                        const price = closes[closes.length - 1];
-                        
-                        // 計算指標
-                        const rsi = calcRSI(closes);
-                        const bbLow = calcBBLow(closes); // 地板價
-                        const bbHigh = calcBBHigh(closes); // 天花板價
+                    // 1. 超跌抄底邏輯 (RSI低 + 觸碰下軌)
+                    if (rsi < 30 && price <= bb.lower) {
+                        oversoldList.innerHTML += createCard(coin.symbol, price, '綠色抄底', 'green');
+                    }
 
-                        const isTop10 = i < 10;
-                        const isSuperCold = rsi < 30 && price <= bbLow; // 超冷代表超跌
-                        const isTooHot = rsi > 70 || price >= bbHigh; // 太熱代表超漲
+                    // 2. 強勢突破邏輯 (RSI高 + 衝破天花板)
+                    if (rsi > 70 && price >= bb.upper) {
+                        breakoutList.innerHTML += createCard(coin.symbol, price, '強勢追漲', 'red');
+                    }
 
-                        if (isSuperCold) {
-                            hasSignal = true;
-                            picks.innerHTML += `
-                                <div class="bg-gray-800 border-2 border-green-500 p-5 rounded-xl shadow-lg relative">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <span class="text-2xl font-black">${coin.symbol}</span>
-                                        ${isTop10 ? '<span class="bg-yellow-500 text-black text-[10px] px-2 py-0.5 rounded font-bold">新手首選</span>' : ''}
-                                    </div>
-                                    <div class="space-y-1 mb-4 text-sm">
-                                        <p class="text-green-400">可以進場: <span class="font-bold font-mono">$${price}</span></p>
-                                        <p class="text-yellow-400">停利目標: <span class="font-bold font-mono">$${(price * 1.05).toFixed(4)}</span></p>
-                                        <p class="text-red-500 font-bold underline">停損價: $${(price * 0.97).toFixed(4)}</p>
-                                    </div>
-                                    <p class="text-[10px] text-gray-500 italic">分析：市場極度恐慌，價格跌到地板區，預期有反彈。</p>
-                                </div>`;
-                        }
-
-                        let statusColor = "text-gray-500";
-                        let statusText = "持幣觀望";
-                        if (isSuperCold) { statusColor = "text-green-400 font-bold"; statusText = "🔵 建議買入"; }
-                        else if (isTooHot) { statusColor = "text-red-400"; statusText = "🔴 建議賣出"; }
-
-                        let heatText = rsi < 35 ? "低溫(冷)" : (rsi > 65 ? "高溫(熱)" : "適中");
-
-                        list.innerHTML += `
-                            <tr class="${isSuperCold ? 'bg-green-900/20' : ''} hover:bg-gray-800">
-                                <td class="p-3">
-                                    <span class="text-gray-600 text-[10px] mr-1">${i+1}.</span>
-                                    <span class="${isTop10 ? 'text-yellow-500 font-bold' : 'text-blue-300'}">${coin.symbol}</span>
-                                </td>
-                                <td class="p-3 text-white font-mono">$${price}</td>
-                                <td class="p-3 text-center text-xs">
-                                    <div class="text-gray-400">${heatText}</div>
-                                    <div class="text-[10px] text-gray-600">${rsi.toFixed(1)}</div>
-                                </td>
-                                <td class="p-3 ${statusColor}">${statusText}</td>
-                                <td class="p-3 text-right text-[10px] text-gray-400">
-                                    利: ${(price * 1.05).toFixed(2)}<br>損: ${(price * 0.97).toFixed(2)}
-                                </td>
-                            </tr>`;
-                    } catch (e) { continue; }
-                }
-
-                document.getElementById('no-signal').classList.toggle('hidden', hasSignal);
-                rules.className = hasSignal ? "mb-8 bg-gray-900 border-l-8 border-red-600 p-5 rounded-r-lg shadow-lg blink-border" : "mb-8 bg-gray-900 border-l-8 border-yellow-600 p-5 rounded-r-lg shadow-lg";
-                document.getElementById('update-time').innerText = "最後更新時間: " + new Date().toLocaleTimeString();
-
-            } catch (err) { console.error(err); }
-        }
-
-        function calcRSI(prices, p=14) {
-            let g=0, l=0;
-            for(let i=prices.length-p; i<prices.length; i++) {
-                let d = prices[i]-prices[i-1];
-                d >= 0 ? g+=d : l-=d;
+                    fullTbody.innerHTML += `
+                        <tr class="text-center">
+                            <td class="p-3 font-bold text-yellow-500">${coin.symbol}</td>
+                            <td class="p-3">$${price}</td>
+                            <td class="p-3">${rsi.toFixed(1)}</td>
+                            <td class="p-3">${rsi < 35 ? '超冷' : (rsi > 65 ? '超熱' : '一般')}</td>
+                        </tr>`;
+                } catch (e) {}
             }
-            return 100 - (100 / (1 + (g/p)/(l/p)));
         }
 
-        function calcBBLow(prices, p=20) {
-            const s = prices.slice(-p);
-            const m = s.reduce((a,b)=>a+b)/p;
-            const d = Math.sqrt(s.map(x=>Math.pow(x-m,2)).reduce((a,b)=>a+b)/p);
-            return m - (d * 2);
-        }
-        
-        function calcBBHigh(prices, p=20) {
-            const s = prices.slice(-p);
-            const m = s.reduce((a,b)=>a+b)/p;
-            const d = Math.sqrt(s.map(x=>Math.pow(x-m,2)).reduce((a,b)=>a+b)/p);
-            return m + (d * 2);
+        function createCard(symbol, price, type, color) {
+            const stopLoss = (price * 0.97).toFixed(4);
+            const takeProfit = (price * 1.09).toFixed(4);
+            const borderCol = color === 'green' ? 'border-green-500' : 'border-red-500';
+            const bgCol = color === 'green' ? 'bg-green-900/20' : 'bg-red-900/20';
+
+            return `
+                <div class="strategy-card ${bgCol} border-2 ${borderCol} p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-2xl font-black">${symbol}</span>
+                        <span class="text-xs bg-white text-black px-2 py-1 rounded">3倍槓桿建議</span>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <p class="flex justify-between">現貨進場: <span class="text-white font-bold">$${price}</span></p>
+                        <hr class="border-gray-700">
+                        <p class="flex justify-between text-yellow-400 italic">合約停利: <span>$${takeProfit}</span></p>
+                        <p class="flex justify-between text-red-500 font-bold underline">合約停損: <span>$${stopLoss}</span></p>
+                    </div>
+                    <p class="mt-4 text-[10px] text-gray-500">※ 停損觸發即離場，3倍槓桿預計虧損約 9% 本金。</p>
+                </div>`;
         }
 
-        runAnalysis();
-        setInterval(runAnalysis, 300000); // 5分鐘自動掃描一次
+        function calcRSI(prices) {
+            let g=0, l=0;
+            for(let i=prices.length-14; i<prices.length; i++) {
+                let d=prices[i]-prices[i-1];
+                d>=0 ? g+=d : l-=d;
+            }
+            return 100 - (100/(1+(g/14)/(l/14)));
+        }
+
+        function calcBB(prices) {
+            const s = prices.slice(-20);
+            const m = s.reduce((a,b)=>a+b)/20;
+            const d = Math.sqrt(s.map(x=>Math.pow(x-m,2)).reduce((a,b)=>a+b)/20);
+            return { upper: m + (d * 2), lower: m - (d * 2) };
+        }
+
+        window.onload = fetchData;
+        setInterval(fetchData, 60000);
     </script>
 </body>
 </html>
