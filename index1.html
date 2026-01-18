@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍀 韭菜保命符 - 台股 ETF 導航儀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; }
+        .etf-card { background: linear-gradient(145deg, #111, #080808); border: 1px solid #333; transition: all 0.3s; position: relative; overflow: hidden; }
+        .status-good { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+        .status-danger { border-color: #ef4444; }
+        .status-wait { border-color: #444; }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.3; } }
+        .gold-glow { text-shadow: 0 0 10px rgba(234, 179, 8, 0.8); }
+    </style>
+</head>
+<body class="text-slate-200 p-4 md:p-8">
+
+    <div class="fixed top-2 right-4 z-50">
+        <span class="text-xs font-black text-emerald-500 italic">BY PROTECTOR K</span>
+    </div>
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 bg-gray-900 border-2 border-emerald-600/30 p-6 rounded-3xl shadow-2xl">
+            <h1 class="text-3xl font-black text-emerald-500 italic flex items-center gap-2">
+                <span>🍀</span> 台股 ETF 存股保命符
+            </h1>
+            <p class="text-xs text-gray-500 mt-2 font-bold tracking-widest uppercase">守護台股本金版 | 數據由 FinMind 提供</p>
+        </header>
+
+        <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-emerald-950/20 p-4 rounded-2xl border border-emerald-900/30">
+                <p class="text-emerald-500 font-black text-sm">🤩 看到黃金機會</p>
+                <p class="text-[10px] text-gray-400">代表股價便宜且沒人要，是加碼好時機。</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800">
+                <p class="text-gray-300 font-black text-sm">😐 定期定額中</p>
+                <p class="text-[10px] text-gray-400">代表路況正常，照原本節奏買就好。</p>
+            </div>
+            <div class="bg-red-950/20 p-4 rounded-2xl border border-red-900/30">
+                <p class="text-red-500 font-black text-sm">🥵 現在漲太多</p>
+                <p class="text-[10px] text-gray-400">代表市場太熱，這時候買容易住套房。</p>
+            </div>
+        </div>
+
+        <div id="etf-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="col-span-full text-center text-gray-600 blink py-20 font-bold tracking-tighter uppercase">正在掃描台股 240 日生命線...</p>
+        </div>
+
+        <footer class="mt-16 p-8 bg-emerald-950/10 border border-emerald-900/20 rounded-[2rem] text-center">
+            <p class="text-emerald-500 font-black mb-2 italic text-sm">⚠️ 保命語：ETF 雖然穩，但分散買入才是王道。</p>
+            <p class="text-gray-700 text-[10px] font-bold">PROTECTOR K ENGINEERING v2.8 (TAIWAN EDITION)</p>
+        </footer>
+    </div>
+
+    <script>
+        // 台股交易量前幾名的精選清單
+        const myETFs = [
+            { id: "0050", name: "元大台灣50" },
+            { id: "006208", name: "富邦台50" },
+            { id: "00878", name: "國泰永續高股息" },
+            { id: "0056", name: "元大高股息" },
+            { id: "00919", name: "群益台灣精選高息" },
+            { id: "00929", name: "復華台灣科技優息" },
+            { id: "00713", name: "元大高息低波" },
+            { id: "00679B", name: "元大美債20年" }
+        ];
+
+        async function fetchStockData(sid) {
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 365); // 抓一年份
+            const startStr = startDate.toISOString().split('T')[0];
+            
+            const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${sid}&start_date=${startStr}`;
+            const res = await fetch(url);
+            const json = await res.json();
+            return json.data;
+        }
+
+        async function analyze() {
+            const listContainer = document.getElementById('etf-list');
+            let allCardsHtml = '';
+
+            for (const etf of myETFs) {
+                try {
+                    const data = await fetchStockData(etf.id);
+                    if (!data || data.length === 0) continue;
+
+                    const prices = data.map(d => d.close);
+                    const currentPrice = prices[prices.length - 1];
+                    const ma240 = prices.reduce((a, b) => a + b) / prices.length; // 年線
+                    const rsi = calcRSI(prices.slice(-20));
+
+                    // 白話判斷邏輯
+                    let statusClass = "status-wait";
+                    let advice = "定期定額中";
+                    let icon = "😐";
+                    let isGolden = false;
+
+                    if (currentPrice < ma240 && rsi < 35) {
+                        statusClass = "status-good";
+                        advice = "💎 發現黃金機會 (超便宜)";
+                        icon = "🤩";
+                        isGolden = true;
+                    } else if (rsi > 70) {
+                        statusClass = "status-danger";
+                        advice = "🥵 現在漲太多了，別追";
+                        icon = "🛑";
+                    }
+
+                    allCardsHtml += `
+                        <div class="etf-card p-6 rounded-[2rem] ${statusClass}">
+                            ${isGolden ? '<div class="absolute top-0 right-0 bg-emerald-500 text-black px-4 py-1 text-[10px] font-black blink italic tracking-widest uppercase">Golden Buy</div>' : ''}
+                            
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h2 class="text-3xl font-black text-white tracking-tighter">${etf.id}</h2>
+                                    <p class="text-gray-500 text-[10px] font-bold uppercase">${etf.name}</p>
+                                </div>
+                                <span class="text-3xl">${icon}</span>
+                            </div>
+
+                            <div class="mb-6 bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <p class="text-[10px] text-gray-500 font-black mb-1">目前市場價格</p>
+                                <p class="text-3xl font-black text-white font-mono">$${currentPrice.toFixed(2)}</p>
+                            </div>
+
+                            <div class="space-y-2 mb-6 text-[10px] font-bold">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">路況(240MA):</span>
+                                    <span class="${currentPrice > ma240 ? 'text-green-500' : 'text-red-500'}">${currentPrice > ma240 ? '高於年線(偏貴)' : '低於年線(便宜)'}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">市場熱度(RSI):</span>
+                                    <span>${rsi.toFixed(1)} ${rsi > 70 ? '🔥 太熱' : rsi < 35 ? '❄️ 沒人理' : '🆗 正常'}</span>
+                                </div>
+                            </div>
+
+                            <div class="text-center py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 font-black text-xs ${isGolden ? 'gold-glow text-yellow-500' : 'text-emerald-500'}">
+                                ${advice}
+                            </div>
+                        </div>
+                    `;
+                    // 更新進度
+                    listContainer.innerHTML = allCardsHtml;
+                } catch (e) {
+                    console.error(`${etf.id} 抓取失敗`);
+                }
+            }
+        }
+
+        function calcRSI(prices) {
+            let g = 0, l = 0;
+            for(let i = prices.length - 14; i < prices.length; i++) {
+                let d = prices[i] - prices[i - 1];
+                d >= 0 ? g += d : l -= d;
+            }
+            if (l === 0) return 100;
+            return 100 - (100 / (1 + (g / 14) / (l / 14)));
+        }
+
+        window.onload = analyze;
+    </script>
+</body>
+</html>
