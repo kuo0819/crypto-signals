@@ -3,133 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Pro 智能策略導航</title>
+    <title>Crypto Pro 終極全能導航儀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #0a0a0a; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; }
         .tab-active { border-bottom: 4px solid #eab308; color: #eab308; }
-        .strategy-card { transition: transform 0.2s; }
-        .strategy-card:hover { transform: translateY(-5px); }
+        .calc-input { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 4px 8px; width: 120px; color: #eab308; font-weight: bold; }
+        .blink { animation: blinker 2s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.5; } }
     </style>
 </head>
-<body class="text-slate-100">
+<body class="text-slate-200 p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto p-4 md:p-8">
-        <header class="mb-8 border-b border-gray-800 pb-6 text-center">
-            <h1 class="text-4xl font-black text-yellow-500 mb-2">PRO 策略導航儀</h1>
-            <p class="text-red-500 font-bold animate-pulse">⚠️ 軍規：合約嚴禁超過 3-5 倍槓桿 | 嚴格執行停損 ⚠️</p>
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 bg-gray-900 border-2 border-yellow-600/50 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-3xl font-black text-yellow-500 tracking-tighter italic">PRO NAVIGATOR</h1>
+                <p class="text-xs text-gray-400 mt-1">全能版：過濾假訊號 + 自動控倉</p>
+            </div>
+            <div class="flex items-center gap-4 bg-black/50 p-4 rounded-xl border border-gray-800">
+                <label class="text-sm font-bold">💰 總本金 (USDT):</label>
+                <input type="number" id="total-capital" value="1000" oninput="analyze()" class="calc-input text-xl">
+            </div>
         </header>
 
-        <nav class="flex justify-center space-x-8 mb-10 text-lg font-bold">
-            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-2 tab-active">🟢 超跌抄底</button>
-            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-2 text-gray-500">🔴 強勢突破</button>
-            <button onclick="switchTab('all')" id="btn-all" class="pb-2 text-gray-500">🔍 全市場監控</button>
+        <nav class="flex space-x-10 mb-8 border-b border-gray-800 font-bold text-sm">
+            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-3 tab-active">❄️ 安全抄底 (極冷反彈)</button>
+            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-3 text-gray-500">🔥 真實突破 (強勢追漲)</button>
+            <button onclick="switchTab('all')" id="btn-all" class="pb-3 text-gray-500">🔍 市場情緒全掃描</button>
         </nav>
 
         <div id="oversold-section">
-            <h3 class="text-xl mb-4 text-green-400 font-bold border-l-4 border-green-400 pl-3">目前符合「超跌反彈」的幣種</h3>
             <div id="oversold-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
 
         <div id="breakout-section" class="hidden">
-            <h3 class="text-xl mb-4 text-red-400 font-bold border-l-4 border-red-400 pl-3">目前符合「強勢突破」的幣種</h3>
             <div id="breakout-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
 
-        <div id="all-section" class="hidden text-sm">
-            <table class="w-full bg-gray-900 rounded-lg overflow-hidden">
-                <thead class="bg-gray-800">
-                    <tr>
-                        <th class="p-4">貨幣</th>
-                        <th class="p-4">價格</th>
-                        <th class="p-4">熱度(RSI)</th>
-                        <th class="p-4">狀態</th>
-                    </tr>
-                </thead>
-                <tbody id="full-market-tbody" class="divide-y divide-gray-800"></tbody>
-            </table>
+        <div id="all-section" class="hidden">
+            <div class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 text-xs">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-800 text-gray-400">
+                        <tr>
+                            <th class="p-4">資產名稱</th>
+                            <th class="p-4">目前價格</th>
+                            <th class="p-4 text-center">市場情緒</th>
+                            <th class="p-4">趨勢狀態</th>
+                            <th class="p-4 text-right">建議</th>
+                        </tr>
+                    </thead>
+                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        const symbols = []; // 會由 API 自動抓取前 50 名
-        let currentTab = 'oversold';
-
-        function switchTab(tab) {
-            currentTab = tab;
-            ['oversold', 'breakout', 'all'].forEach(t => {
-                document.getElementById(`${t}-section`).classList.toggle('hidden', t !== tab);
-                document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
-                document.getElementById(`btn-${t}`).classList.toggle('text-gray-500', t !== tab);
-            });
-            fetchData();
-        }
-
-        async function fetchData() {
-            const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr');
-            const tickerData = await tickerRes.json();
-            const top50 = tickerData
-                .filter(d => d.symbol.endsWith('USDT'))
-                .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-                .slice(0, 50);
+        async function analyze() {
+            const capital = parseFloat(document.getElementById('total-capital').value) || 0;
+            const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+            const data = await res.json();
+            const top50 = data.filter(d => d.symbol.endsWith('USDT')).sort((a, b) => b.quoteVolume - a.quoteVolume).slice(0, 50);
 
             const oversoldList = document.getElementById('oversold-list');
             const breakoutList = document.getElementById('breakout-list');
-            const fullTbody = document.getElementById('full-market-tbody');
-            
-            oversoldList.innerHTML = '';
-            breakoutList.innerHTML = '';
-            fullTbody.innerHTML = '';
+            const fullTbody = document.getElementById('full-tbody');
+
+            oversoldList.innerHTML = ''; breakoutList.innerHTML = ''; fullTbody.innerHTML = '';
 
             for (let coin of top50) {
                 try {
-                    const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=50`);
+                    const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=200`);
                     const kData = await kRes.json();
                     const closes = kData.map(d => parseFloat(d[4]));
+                    const volumes = kData.map(d => parseFloat(d[5]));
                     const price = closes[closes.length - 1];
+
+                    // 指標計算
                     const rsi = calcRSI(closes);
-                    const bb = calcBB(closes);
+                    const ema200 = calcEMA(closes, 200);
+                    const avgVol = volumes.slice(-20).reduce((a,b)=>a+b)/20;
+                    const currentVol = volumes[volumes.length - 1];
+                    
+                    const volConfirm = currentVol > avgVol * 1.5; // 量能放大
+                    const isAboveEMA = price > ema200; // 長期多頭趨勢
+                    
+                    // 資金建議：單筆投入本金 15% (2%風險管控)
+                    const suggestAmount = (capital * 0.15).toFixed(2);
 
-                    // 1. 超跌抄底邏輯 (RSI低 + 觸碰下軌)
-                    if (rsi < 30 && price <= bb.lower) {
-                        oversoldList.innerHTML += createCard(coin.symbol, price, '綠色抄底', 'green');
+                    // 1. 安全抄底：超冷 + 有量
+                    if (rsi < 32) {
+                        oversoldList.innerHTML += createCard(coin.symbol, price, suggestAmount, true, volConfirm, isAboveEMA);
+                    }
+                    // 2. 真實突破：超熱 + 有量
+                    if (rsi > 68 && volConfirm) {
+                        breakoutList.innerHTML += createCard(coin.symbol, price, suggestAmount, false, volConfirm, isAboveEMA);
                     }
 
-                    // 2. 強勢突破邏輯 (RSI高 + 衝破天花板)
-                    if (rsi > 70 && price >= bb.upper) {
-                        breakoutList.innerHTML += createCard(coin.symbol, price, '強勢追漲', 'red');
-                    }
+                    // 3. 全掃描表
+                    let mood = rsi < 32 ? "❄️ 極冷" : (rsi > 68 ? "🔥 極熱" : "☁️ 一般");
+                    let moodColor = rsi < 32 ? "text-green-400" : (rsi > 68 ? "text-red-400" : "text-gray-500");
 
                     fullTbody.innerHTML += `
-                        <tr class="text-center">
-                            <td class="p-3 font-bold text-yellow-500">${coin.symbol}</td>
-                            <td class="p-3">$${price}</td>
-                            <td class="p-3">${rsi.toFixed(1)}</td>
-                            <td class="p-3">${rsi < 35 ? '超冷' : (rsi > 65 ? '超熱' : '一般')}</td>
+                        <tr class="hover:bg-gray-800">
+                            <td class="p-4 font-bold text-yellow-500">${coin.symbol}</td>
+                            <td class="p-4 text-white font-bold">$${price}</td>
+                            <td class="p-4 text-center ${moodColor}">${mood} (${rsi.toFixed(0)})</td>
+                            <td class="p-4 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-bold">
+                                ${isAboveEMA ? '📈 多頭趨勢' : '📉 空頭趨勢'}
+                            </td>
+                            <td class="p-4 text-right ${volConfirm ? 'text-yellow-500' : 'text-gray-600'}">
+                                ${volConfirm ? '🔥 主力進場' : '成交一般'}
+                            </td>
                         </tr>`;
-                } catch (e) {}
+                } catch(e) {}
             }
         }
 
-        function createCard(symbol, price, type, color) {
+        function createCard(symbol, price, amount, isOversold, volConfirm, isAboveEMA) {
+            const isSafe = volConfirm && isAboveEMA;
             const stopLoss = (price * 0.97).toFixed(4);
-            const takeProfit = (price * 1.09).toFixed(4);
-            const borderCol = color === 'green' ? 'border-green-500' : 'border-red-500';
-            const bgCol = color === 'green' ? 'bg-green-900/20' : 'bg-red-900/20';
+            const takeProfit = (price * 1.08).toFixed(4);
 
             return `
-                <div class="strategy-card ${bgCol} border-2 ${borderCol} p-6 rounded-2xl">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-2xl font-black">${symbol}</span>
-                        <span class="text-xs bg-white text-black px-2 py-1 rounded">3倍槓桿建議</span>
+                <div class="bg-gray-900 border-2 ${isSafe ? 'border-green-500' : 'border-yellow-600'} p-6 rounded-2xl shadow-xl relative">
+                    ${isSafe ? '<div class="absolute -top-2 -right-2 bg-green-500 text-black px-3 py-1 rounded-full text-[10px] font-black blink">高勝率推薦</div>' : ''}
+                    <h3 class="text-2xl font-black mb-1">${symbol}</h3>
+                    <div class="text-[10px] text-gray-500 mb-4">${isOversold ? '💡 抄底模式' : '⚡ 突破模式'}</div>
+                    
+                    <div class="bg-yellow-500/10 border border-yellow-500/50 p-4 rounded-xl mb-4 text-center">
+                        <p class="text-[10px] text-yellow-500 font-bold uppercase mb-1">建議單筆投入量</p>
+                        <p class="text-3xl font-black text-white">$ ${amount} <span class="text-sm font-normal">USDT</span></p>
                     </div>
-                    <div class="space-y-2 text-sm">
-                        <p class="flex justify-between">現貨進場: <span class="text-white font-bold">$${price}</span></p>
-                        <hr class="border-gray-700">
-                        <p class="flex justify-between text-yellow-400 italic">合約停利: <span>$${takeProfit}</span></p>
-                        <p class="flex justify-between text-red-500 font-bold underline">合約停損: <span>$${stopLoss}</span></p>
+
+                    <div class="space-y-3 text-sm mb-6">
+                        <div class="flex justify-between"><span>進場價:</span><span class="text-white font-mono">$${price}</span></div>
+                        <div class="flex justify-between text-yellow-400"><span>目標獲利:</span><span class="font-mono">$${takeProfit}</span></div>
+                        <div class="flex justify-between text-red-500 font-bold underline"><span>強制停損:</span><span class="font-mono">$${stopLoss}</span></div>
                     </div>
-                    <p class="mt-4 text-[10px] text-gray-500">※ 停損觸發即離場，3倍槓桿預計虧損約 9% 本金。</p>
+
+                    <div class="bg-black/50 p-3 rounded-lg text-[10px] text-gray-400 space-y-1">
+                        <p>大戶動向: ${volConfirm ? '✅ 成交量放大' : '❌ 量能平淡'}</p>
+                        <p>長期趨勢: ${isAboveEMA ? '✅ EMA200 以上' : '❌ EMA200 以下'}</p>
+                    </div>
                 </div>`;
         }
 
@@ -142,15 +159,26 @@
             return 100 - (100/(1+(g/14)/(l/14)));
         }
 
-        function calcBB(prices) {
-            const s = prices.slice(-20);
-            const m = s.reduce((a,b)=>a+b)/20;
-            const d = Math.sqrt(s.map(x=>Math.pow(x-m,2)).reduce((a,b)=>a+b)/20);
-            return { upper: m + (d * 2), lower: m - (d * 2) };
+        function calcEMA(prices, period) {
+            const k = 2 / (period + 1);
+            let ema = prices[0];
+            for (let i = 1; i < prices.length; i++) {
+                ema = (prices[i] * k) + (ema * (1 - k));
+            }
+            return ema;
         }
 
-        window.onload = fetchData;
-        setInterval(fetchData, 60000);
+        function switchTab(tab) {
+            ['oversold', 'breakout', 'all'].forEach(t => {
+                document.getElementById(`${t}-section`).classList.toggle('hidden', t !== tab);
+                document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
+                document.getElementById(`btn-${t}`).classList.toggle('text-gray-500', t !== tab);
+            });
+            analyze();
+        }
+
+        window.onload = analyze;
+        setInterval(analyze, 300000); // 5分鐘自動更新
     </script>
 </body>
 </html>
