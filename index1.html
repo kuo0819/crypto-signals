@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍀 韭菜保命符 - 台股 ETF 導航儀</title>
+    <title>🍀 韭菜保命符 - 台股 ETF 20強版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; }
-        .etf-card { background: linear-gradient(145deg, #111, #080808); border: 1px solid #333; transition: all 0.3s; position: relative; overflow: hidden; }
+        .etf-card { background: linear-gradient(145deg, #111, #080808); border: 1px solid #333; transition: all 0.3s; position: relative; }
         .status-good { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
         .status-danger { border-color: #ef4444; }
         .status-wait { border-color: #444; }
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
-        .gold-glow { text-shadow: 0 0 10px rgba(234, 179, 8, 0.8); }
+        .gold-glow { text-shadow: 0 0 10px rgba(234, 179, 8, 0.8); color: #eab308; }
+        /* 網格微調 */
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8">
@@ -22,55 +24,63 @@
         <span class="text-xs font-black text-emerald-500 italic">BY PROTECTOR K</span>
     </div>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8 bg-gray-900 border-2 border-emerald-600/30 p-6 rounded-3xl shadow-2xl">
-            <h1 class="text-3xl font-black text-emerald-500 italic flex items-center gap-2">
-                <span>🍀</span> 台股 ETF 存股保命符
-            </h1>
-            <p class="text-xs text-gray-500 mt-2 font-bold tracking-widest uppercase">守護台股本金版 | 數據由 FinMind 提供</p>
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 bg-gray-900 border-2 border-emerald-600/30 p-6 rounded-3xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-emerald-500 italic flex items-center gap-2">
+                    <span>🍀</span> 台股 ETF 20強保命符
+                </h1>
+                <p class="text-xs text-gray-500 mt-2 font-bold tracking-widest uppercase text-center md:text-left">熱門前 20 大成交量掃描儀</p>
+            </div>
+            <button onclick="analyze()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-6 py-2 rounded-full transition-all uppercase tracking-widest">
+                手動重新掃描
+            </button>
         </header>
 
-        <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-emerald-950/20 p-4 rounded-2xl border border-emerald-900/30">
-                <p class="text-emerald-500 font-black text-sm">🤩 看到黃金機會</p>
-                <p class="text-[10px] text-gray-400">代表股價便宜且沒人要，是加碼好時機。</p>
-            </div>
-            <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800">
-                <p class="text-gray-300 font-black text-sm">😐 定期定額中</p>
-                <p class="text-[10px] text-gray-400">代表路況正常，照原本節奏買就好。</p>
-            </div>
-            <div class="bg-red-950/20 p-4 rounded-2xl border border-red-900/30">
-                <p class="text-red-500 font-black text-sm">🥵 現在漲太多</p>
-                <p class="text-[10px] text-gray-400">代表市場太熱，這時候買容易住套房。</p>
-            </div>
+        <div class="mb-8 flex flex-wrap justify-center gap-4">
+            <span class="px-4 py-1 bg-emerald-950/30 border border-emerald-500/50 rounded-full text-[10px] font-bold text-emerald-500">🤩 撿便宜機會</span>
+            <span class="px-4 py-1 bg-gray-900 border border-gray-700 rounded-full text-[10px] font-bold text-gray-400">😐 定期定額正常</span>
+            <span class="px-4 py-1 bg-red-950/30 border border-red-500/50 rounded-full text-[10px] font-bold text-red-500">🛑 市場過熱不追</span>
         </div>
 
-        <div id="etf-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <p class="col-span-full text-center text-gray-600 blink py-20 font-bold tracking-tighter uppercase">正在掃描台股 240 日生命線...</p>
+        <div id="etf-list" class="grid-layout">
+            <p class="col-span-full text-center text-gray-600 blink py-20 font-bold tracking-tighter uppercase">正在同時掃描 20 支 ETF 歷史位階...</p>
         </div>
 
         <footer class="mt-16 p-8 bg-emerald-950/10 border border-emerald-900/20 rounded-[2rem] text-center">
-            <p class="text-emerald-500 font-black mb-2 italic text-sm">⚠️ 保命語：ETF 雖然穩，但分散買入才是王道。</p>
-            <p class="text-gray-700 text-[10px] font-bold">PROTECTOR K ENGINEERING v2.8 (TAIWAN EDITION)</p>
+            <p class="text-emerald-500 font-black mb-2 italic text-sm text-center">💡 韭菜保命：不要一次買完，分批買入才是真理。</p>
+            <p class="text-gray-700 text-[10px] font-bold uppercase tracking-widest">Protector K System | Taiwan Top 20 ETF Scanner</p>
         </footer>
     </div>
 
     <script>
-        // 台股交易量前幾名的精選清單
+        // 台灣成交量前 20 名最熱門 ETF (包含市值型、高股息、債券)
         const myETFs = [
+            { id: "00878", name: "國泰永續高股息" },
+            { id: "00929", name: "復華台灣科技優息" },
+            { id: "00919", name: "群益台灣精選高息" },
+            { id: "0056", name: "元大高股息" },
+            { id: "00940", name: "元大台灣價值高息" },
             { id: "0050", name: "元大台灣50" },
             { id: "006208", name: "富邦台50" },
-            { id: "00878", name: "國泰永續高股息" },
-            { id: "0056", name: "元大高股息" },
-            { id: "00919", name: "群益台灣精選高息" },
-            { id: "00929", name: "復華台灣科技優息" },
             { id: "00713", name: "元大高息低波" },
-            { id: "00679B", name: "元大美債20年" }
+            { id: "00915", name: "凱基台灣優選高股息" },
+            { id: "00881", name: "國泰台灣5G+" },
+            { id: "00935", name: "野村臺灣創新科技" },
+            { id: "00934", name: "中信成長高股息" },
+            { id: "00936", name: "台新臺灣永續高息" },
+            { id: "00900", name: "富邦特選高股息" },
+            { id: "00679B", name: "元大美債20年" },
+            { id: "00687B", name: "國泰美債20年" },
+            { id: "00937B", name: "群益ESG投等債20+" },
+            { id: "00720B", name: "元大投資級公司債" },
+            { id: "00751B", name: "元大AAA至A級公司債" },
+            { id: "00637L", name: "元大滬深300正2" }
         ];
 
         async function fetchStockData(sid) {
             const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 365); // 抓一年份
+            startDate.setDate(startDate.getDate() - 365); 
             const startStr = startDate.toISOString().split('T')[0];
             
             const url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${sid}&start_date=${startStr}`;
@@ -81,8 +91,10 @@
 
         async function analyze() {
             const listContainer = document.getElementById('etf-list');
+            listContainer.innerHTML = '<p class="col-span-full text-center text-gray-600 blink py-20 font-bold tracking-tighter uppercase">連線證交所大數據中...</p>';
             let allCardsHtml = '';
 
+            // 為了避免一次請求過多被封鎖，採用分批處理
             for (const etf of myETFs) {
                 try {
                     const data = await fetchStockData(etf.id);
@@ -93,12 +105,12 @@
                     const ma240 = prices.reduce((a, b) => a + b) / prices.length; // 年線
                     const rsi = calcRSI(prices.slice(-20));
 
-                    // 白話判斷邏輯
                     let statusClass = "status-wait";
                     let advice = "定期定額中";
                     let icon = "😐";
                     let isGolden = false;
 
+                    // 邏輯判斷
                     if (currentPrice < ma240 && rsi < 35) {
                         statusClass = "status-good";
                         advice = "💎 發現黃金機會 (超便宜)";
@@ -106,7 +118,7 @@
                         isGolden = true;
                     } else if (rsi > 70) {
                         statusClass = "status-danger";
-                        advice = "🥵 現在漲太多了，別追";
+                        advice = "🥵 現在太熱，不建議買";
                         icon = "🛑";
                     }
 
@@ -116,37 +128,36 @@
                             
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <h2 class="text-3xl font-black text-white tracking-tighter">${etf.id}</h2>
-                                    <p class="text-gray-500 text-[10px] font-bold uppercase">${etf.name}</p>
+                                    <h2 class="text-2xl font-black text-white tracking-tighter">${etf.id}</h2>
+                                    <p class="text-[10px] text-gray-500 font-bold uppercase">${etf.name}</p>
                                 </div>
-                                <span class="text-3xl">${icon}</span>
+                                <span class="text-2xl">${icon}</span>
                             </div>
 
-                            <div class="mb-6 bg-white/5 p-4 rounded-2xl border border-white/5">
-                                <p class="text-[10px] text-gray-500 font-black mb-1">目前市場價格</p>
+                            <div class="mb-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <p class="text-[8px] text-gray-500 font-black mb-1">目前價格</p>
                                 <p class="text-3xl font-black text-white font-mono">$${currentPrice.toFixed(2)}</p>
                             </div>
 
-                            <div class="space-y-2 mb-6 text-[10px] font-bold">
+                            <div class="space-y-1 mb-6 text-[10px] font-bold">
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">路況(240MA):</span>
-                                    <span class="${currentPrice > ma240 ? 'text-green-500' : 'text-red-500'}">${currentPrice > ma240 ? '高於年線(偏貴)' : '低於年線(便宜)'}</span>
+                                    <span class="text-gray-600 uppercase">240日年線:</span>
+                                    <span class="${currentPrice > ma240 ? 'text-gray-400' : 'text-emerald-500'}">${currentPrice > ma240 ? '上方' : '下方 (甜甜價)'}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">市場熱度(RSI):</span>
-                                    <span>${rsi.toFixed(1)} ${rsi > 70 ? '🔥 太熱' : rsi < 35 ? '❄️ 沒人理' : '🆗 正常'}</span>
+                                    <span class="text-gray-600 uppercase">市場熱度:</span>
+                                    <span class="${rsi > 70 ? 'text-red-500' : 'text-gray-400'}">${rsi.toFixed(1)} ${rsi > 70 ? '危險' : '安全'}</span>
                                 </div>
                             </div>
 
-                            <div class="text-center py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 font-black text-xs ${isGolden ? 'gold-glow text-yellow-500' : 'text-emerald-500'}">
+                            <div class="text-center py-3 rounded-xl bg-white/5 border border-white/5 font-black text-[11px] ${isGolden ? 'gold-glow' : 'text-gray-400'}">
                                 ${advice}
                             </div>
                         </div>
                     `;
-                    // 更新進度
                     listContainer.innerHTML = allCardsHtml;
                 } catch (e) {
-                    console.error(`${etf.id} 抓取失敗`);
+                    console.error(`${etf.id} 讀取失敗`);
                 }
             }
         }
