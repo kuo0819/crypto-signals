@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto 智能選幣系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+
+    <div class="container mx-auto px-4 py-8">
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
+                Crypto Signal Dashboard
+            </h1>
+            <div id="status" class="text-sm text-gray-400">系統即時監控中...</div>
+        </header>
+
+        <section class="mb-12">
+            <h2 class="text-xl font-bold mb-4 border-l-4 border-yellow-500 pl-3">🔥 今日進場推薦 (RSI 超賣)</h2>
+            <div id="recommend-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="animate-pulse bg-gray-800 h-32 rounded-xl"></div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-bold mb-4 border-l-4 border-blue-500 pl-3">📊 全市場即時訊號 (USDT 對)</h2>
+            <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-xl">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-700 text-gray-300">
+                            <th class="p-4">幣種</th>
+                            <th class="p-4">價格 (USDT)</th>
+                            <th class="p-4">RSI (14)</th>
+                            <th class="p-4">建議動作</th>
+                            <th class="p-4">預期出場價</th>
+                        </tr>
+                    </thead>
+                    <tbody id="market-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://api.binance.com/api/v3';
+        
+        // 簡單計算 RSI 的函數
+        function calculateRSI(prices, period = 14) {
+            let gains = 0, losses = 0;
+            for (let i = 0; i < period; i++) {
+                let diff = prices[i + 1] - prices[i];
+                if (diff >= 0) gains += diff;
+                else losses -= diff;
+            }
+            let avgGain = gains / period;
+            let avgLoss = losses / period;
+            return 100 - (100 / (1 + avgGain / avgLoss));
+        }
+
+        async function getSignals() {
+            try {
+                // 1. 取得所有 USDT 交易對 (為了效能，這裡先選取前 20 名主流幣)
+                const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT', 'DOTUSDT', 'DOGEUSDT', 'AVAXUSDT', 'LINKUSDT'];
+                const marketTbody = document.getElementById('market-tbody');
+                const recommendContainer = document.getElementById('recommend-container');
+                
+                marketTbody.innerHTML = '';
+                recommendContainer.innerHTML = '';
+
+                for (let symbol of symbols) {
+                    // 2. 獲取 K 線數據 (1小時線)
+                    const resp = await fetch(`${BASE_URL}/klines?symbol=${symbol}&interval=1h&limit=50`);
+                    const data = await resp.json();
+                    const closes = data.map(d => parseFloat(d[4]));
+                    const currentPrice = closes[closes.length - 1];
+                    
+                    // 3. 計算 RSI
+                    const rsi = calculateRSI(closes.slice(-16)).toFixed(2);
+                    
+                    // 4. 判斷邏輯
+                    let action = "觀望";
+                    let actionClass = "text-gray-400";
+                    let targetExit = (currentPrice * 1.03).toFixed(4); // 設 3% 為出場點
+
+                    if (rsi < 35) {
+                        action = "★ 建議進場";
+                        actionClass = "text-green-400 font-bold";
+                        // 加入推薦區
+                        recommendContainer.innerHTML += `
+                            <div class="bg-gradient-to-br from-green-900 to-gray-800 p-6 rounded-xl border border-green-500 shadow-lg">
+                                <h3 class="text-2xl font-bold text-green-400">${symbol}</h3>
+                                <p class="text-sm text-gray-300 mt-2">現價: ${currentPrice}</p>
+                                <p class="text-sm text-yellow-500">建議出場點: ${targetExit}</p>
+                                <div class="mt-4 text-xs bg-green-500 text-white inline-block px-2 py-1 rounded">低位反彈機會</div>
+                            </div>
+                        `;
+                    } else if (rsi > 65) {
+                        action = "▼ 建議分批出場";
+                        actionClass = "text-red-400";
+                    }
+
+                    // 5. 渲染表格
+                    marketTbody.innerHTML += `
+                        <tr class="border-b border-gray-700 hover:bg-gray-750 transition">
+                            <td class="p-4 font-mono font-bold">${symbol}</td>
+                            <td class="p-4">$${currentPrice}</td>
+                            <td class="p-4">${rsi}</td>
+                            <td class="p-4 ${actionClass}">${action}</td>
+                            <td class="p-4 text-yellow-500 font-semibold">$${targetExit}</td>
+                        </tr>
+                    `;
+                }
+                document.getElementById('status').innerText = "最後更新: " + new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error("API 錯誤:", error);
+            }
+        }
+
+        getSignals();
+        setInterval(getSignals, 30000); // 每 30 秒自動更新一次
+    </script>
+</body>
+</html>
