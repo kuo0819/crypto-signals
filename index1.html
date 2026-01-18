@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍀 Protector K - 全球實戰診斷儀</title>
+    <title>🍀 全球保命符 - 最終實戰診斷儀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #050505; color: #e2e8f0; }
-        .card-gradient { background: linear-gradient(145deg, #111, #080808); border: 1px solid #333; transition: all 0.3s; }
-        .status-danger { border-color: #ef4444; background: linear-gradient(145deg, #220a0a, #080808); }
-        .status-success { border-color: #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); background: linear-gradient(145deg, #0a2214, #080808); }
+        .card-gradient { background: linear-gradient(145deg, #111, #080808); border: 1px solid #333; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .status-danger { border-color: #ef4444; background: linear-gradient(145deg, #220a0a, #080808); box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
+        .status-success { border-color: #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.25); background: linear-gradient(145deg, #0a2214, #080808); }
         .status-normal { border-color: #444; }
         .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: 900; }
+        .calc-input { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 6px 10px; color: #10b981; font-weight: bold; }
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
     </style>
@@ -20,130 +21,196 @@
 
     <div class="max-w-7xl mx-auto">
         <header class="mb-8 bg-gray-900 border-2 border-emerald-600/30 p-6 rounded-3xl shadow-2xl">
-            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
-                <div>
-                    <h1 class="text-3xl font-black text-emerald-500 italic tracking-tighter">GLOBAL WEALTH GUARD</h1>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">實戰掃描模式中 | 無延遲數據解析</p>
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="lg:col-span-1">
+                    <h1 class="text-3xl font-black text-emerald-500 italic tracking-tighter">GLOBAL GUARD</h1>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">台美分帳實戰模式 | v4.0</p>
                 </div>
                 
-                <div class="flex flex-wrap gap-4 bg-black/40 p-4 rounded-2xl border border-gray-800">
+                <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-4 bg-black/40 p-4 rounded-2xl border border-gray-800">
                     <div>
-                        <label class="text-[9px] font-black text-gray-400 block mb-1">🇹🇼 TWD 本金</label>
-                        <input type="number" id="cap-tw" value="1000000" class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-emerald-400 text-sm font-bold w-32">
+                        <label class="text-[9px] font-black text-gray-400 block mb-1 uppercase">🇹🇼 TWD 本金</label>
+                        <input type="number" id="cap-tw" oninput="saveSettings()" class="calc-input w-full text-emerald-400">
                     </div>
                     <div>
-                        <label class="text-[9px] font-black text-gray-400 block mb-1">🇺🇸 USD 本金</label>
-                        <input type="number" id="cap-us" value="30000" class="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-blue-400 text-sm font-bold w-32">
+                        <label class="text-[9px] font-black text-gray-400 block mb-1 uppercase">🇺🇸 USD 本金</label>
+                        <input type="number" id="cap-us" oninput="saveSettings()" class="calc-input w-full text-blue-400">
                     </div>
-                    <button onclick="runDiagnostic()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-8 py-2 rounded-full shadow-lg transition-all self-end uppercase">
-                        開始實戰診斷
-                    </button>
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 block mb-1 uppercase">🤖 TG Token</label>
+                        <input type="password" id="tg-token" oninput="saveSettings()" class="calc-input w-full">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 block mb-1 uppercase">🆔 Chat ID</label>
+                        <input type="text" id="tg-id" oninput="saveSettings()" class="calc-input w-full">
+                    </div>
                 </div>
+            </div>
+            <div class="mt-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex gap-4 text-[9px] font-black uppercase">
+                    <span class="flex items-center gap-1 text-red-500"><span class="w-2 h-2 rounded-full bg-red-500"></span> 價格過高</span>
+                    <span class="flex items-center gap-1 text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 買入標準</span>
+                    <span class="flex items-center gap-1 text-gray-500"><span class="w-2 h-2 rounded-full bg-gray-500"></span> 觀望</span>
+                </div>
+                <button onclick="analyzeAll()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-10 py-2 rounded-full shadow-lg transition-all uppercase">
+                    執行全球診斷掃描
+                </button>
             </div>
         </header>
 
         <nav class="flex space-x-12 mb-8 border-b border-gray-800 font-bold text-sm">
-            <button onclick="switchMarket('tw')" id="btn-tw" class="pb-4 tab-active">台股 ETF 監測</button>
-            <button onclick="switchMarket('us')" id="btn-us" class="pb-4 text-gray-500 hover:text-gray-300">美股權值 監測</button>
+            <button onclick="switchMarket('tw')" id="btn-tw" class="pb-4 tab-active">🇹🇼 台股 ETF (20強)</button>
+            <button onclick="switchMarket('us')" id="btn-us" class="pb-4 text-gray-500 hover:text-gray-300">🇺🇸 美股權值 (15強)</button>
         </nav>
 
-        <div id="display-area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <p class="col-span-full text-center text-gray-600 py-20 font-bold italic blink">請點擊上方按鈕執行實戰診斷...</p>
+        <div id="tw-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <p class="col-span-full text-center text-gray-600 py-20 font-bold italic blink uppercase">等待指令中...</p>
         </div>
+        <div id="us-section" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+        <footer class="mt-16 p-8 bg-emerald-950/10 border border-emerald-900/20 rounded-3xl text-center">
+            <p class="text-emerald-500 font-black mb-1 italic text-sm italic">守護本金是第一優先，利潤是市場給的獎勵。</p>
+            <p class="text-gray-700 text-[10px] font-bold uppercase tracking-widest">Protector K - Asset Management Tool</p>
+        </footer>
     </div>
 
     <script>
-        // 模擬當前實戰清單
-        const twList = [
-            { id: "0050", name: "元大台灣50", price: 205.5, ma240: 185.2, rsi: 65 },
-            { id: "00878", name: "國泰永續高股息", price: 22.8, ma240: 23.5, rsi: 32 }, // 模擬黃金機會
-            { id: "00919", name: "群益精選高息", price: 26.1, ma240: 25.8, rsi: 55 },
-            { id: "00679B", name: "元大美債20年", price: 28.5, ma240: 30.2, rsi: 28 }  // 模擬黃金機會
-        ];
+        const twList = ["00878","00929","00919","0056","00940","0050","006208","00713","00915","00881","00935","00934","00936","00900","00679B","00687B","00937B","00720B","00751B","00637L"];
+        const usList = ["VOO","QQQ","VTI","TSLA","NVDA","AAPL","MSFT","GOOGL","BRK.B","AMD","TSM","AVGO","LLY","META","AMZN"];
+        let sentSignals = new Set();
 
-        const usList = [
-            { id: "VOO", name: "S&P 500 ETF", price: 540.2, ma240: 510.5, rsi: 62 },
-            { id: "NVDA", name: "NVIDIA Corp", price: 145.8, ma240: 105.2, rsi: 78 }, // 模擬價格過高
-            { id: "TSM", name: "台積電 ADR", price: 195.2, ma240: 165.5, rsi: 72 },   // 模擬價格過高
-            { id: "AAPL", name: "Apple Inc", price: 225.5, ma240: 228.2, rsi: 34 }    // 模擬黃金機會
-        ];
+        window.onload = () => {
+            document.getElementById('cap-tw').value = localStorage.getItem('cap_tw') || 1000000;
+            document.getElementById('cap-us').value = localStorage.getItem('cap_us') || 30000;
+            document.getElementById('tg-token').value = localStorage.getItem('glob_tk') || '';
+            document.getElementById('tg-id').value = localStorage.getItem('glob_id') || '';
+            analyzeAll();
+        };
 
-        let currentMarket = 'tw';
-
-        function switchMarket(m) {
-            currentMarket = m;
-            document.getElementById('btn-tw').className = `pb-4 ${m==='tw'?'tab-active':'text-gray-500'}`;
-            document.getElementById('btn-us').className = `pb-4 ${m==='us'?'tab-active':'text-gray-500'}`;
-            runDiagnostic();
+        function saveSettings() {
+            localStorage.setItem('cap_tw', document.getElementById('cap-tw').value);
+            localStorage.setItem('cap_us', document.getElementById('cap-us').value);
+            localStorage.setItem('glob_tk', document.getElementById('tg-token').value);
+            localStorage.setItem('glob_id', document.getElementById('tg-id').value);
         }
 
-        function runDiagnostic() {
-            const container = document.getElementById('display-area');
-            const capTW = document.getElementById('cap-tw').value;
-            const capUS = document.getElementById('cap-us').value;
-            const list = currentMarket === 'tw' ? twList : usList;
-            const cap = currentMarket === 'tw' ? capTW : capUS;
-            const currency = currentMarket === 'tw' ? 'TWD' : 'USD';
+        async function sendTG(msg) {
+            const token = document.getElementById('tg-token').value;
+            const id = document.getElementById('tg-id').value;
+            if(!token || !id) return;
+            try { await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${id}&text=${encodeURIComponent(msg)}&parse_mode=HTML`); } catch(e) {}
+        }
 
+        async function analyzeAll() {
+            const twCap = parseFloat(document.getElementById('cap-tw').value) || 0;
+            const usCap = parseFloat(document.getElementById('cap-us').value) || 0;
+            
+            analyzeMarket('tw', twList, "🇹🇼", "TWD", twCap);
+            analyzeMarket('us', usList, "🇺🇸", "USD", usCap);
+        }
+
+        async function analyzeMarket(type, list, flag, currency, cap) {
+            const container = document.getElementById(`${type}-section`);
             let html = '';
-            list.forEach(item => {
-                let status = "normal";
-                let advice = "觀望 / 定期定額";
-                let desc = "位階尚可，不建議大筆加碼。";
-                let icon = "😐";
+            for(let id of list) {
+                try {
+                    let prices = [];
+                    const url = type === 'tw' ? `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${id}&start_date=${new Date(Date.now()-365*86400000).toISOString().split('T')[0]}` : `https://stooq.com/q/d/l/?s=${id}.US&i=d`;
+                    const res = await fetch(url);
+                    if(type === 'tw') {
+                        const json = await res.json();
+                        prices = json.data.map(d => d.close);
+                    } else {
+                        const text = await res.text();
+                        prices = text.split('\n').slice(1).filter(r => r).map(r => parseFloat(r.split(',')[4]));
+                    }
+                    if(prices.length > 0) {
+                        html += processCard(id, prices, flag, cap, currency);
+                        container.innerHTML = html;
+                    }
+                } catch(e) {}
+            }
+        }
 
-                if (item.rsi > 70) {
-                    status = "danger";
-                    advice = "價格過高，禁買";
-                    desc = "市場太熱，追高必死，請等回檔。";
-                    icon = "🥵";
-                } else if (item.price < item.ma240 && item.rsi < 35) {
-                    status = "success";
-                    advice = "已達買入標準";
-                    desc = "甜甜價出現！建議執行保命分批買。";
-                    icon = "🤩";
+        function processCard(id, prices, flag, cap, currency) {
+            const current = prices[prices.length - 1];
+            const ma240 = prices.reduce((a,b) => a + b) / prices.length;
+            const rsi = calcRSI(prices.slice(-20));
+            
+            let statusLabel = "⚪ 觀望 / 定期定額";
+            let statusColor = "text-gray-400";
+            let cardClass = "status-normal";
+            let advice = "目前的位階尚可，不適合大筆加碼，維持原有節奏。";
+            let icon = "😐";
+
+            if (rsi > 70) {
+                statusLabel = "🔴 價格過高，禁買";
+                statusColor = "text-red-500";
+                cardClass = "status-danger";
+                advice = "市場情緒過熱，追高極具風險，請耐心等待回檔。";
+                icon = "🥵";
+            } else if (current < ma240 && rsi < 35) {
+                statusLabel = "🟢 已達買入標準";
+                statusColor = "text-emerald-500";
+                cardClass = "status-success";
+                advice = "股價處於年線下低位階，建議執行保命分批買入。";
+                icon = "🤩";
+                
+                // 觸發 TG 通知
+                if(!sentSignals.has(id)) {
+                    sendTG(`<b>💎 買入標記 (${flag})</b>\n\n標的：<b>${id}</b>\n現價：$${current.toFixed(2)}\n\n💡 建議投入量：<b>${(cap * 0.15).toFixed(0)} ${currency}</b>\n診斷：已達年線下低位階標準。`);
+                    sentSignals.add(id);
+                    setTimeout(() => sentSignals.delete(id), 86400000);
                 }
+            }
 
-                const suggest = (cap * 0.15).toLocaleString();
+            const suggest = (cap * 0.15).toLocaleString();
 
-                html += `
-                    <div class="card-gradient p-6 rounded-[2.5rem] border-2 status-${status}">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h2 class="text-2xl font-black text-white">${item.id}</h2>
-                                <p class="text-[10px] text-gray-500 font-bold uppercase">${item.name}</p>
-                            </div>
-                            <span class="text-3xl">${icon}</span>
+            return `
+                <div class="card-gradient p-6 rounded-[2.5rem] border-2 ${cardClass}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-2xl font-black text-white">${id}</h2>
+                            <p class="text-[10px] font-black uppercase ${statusColor}">${statusLabel}</p>
                         </div>
+                        <span class="text-2xl">${icon}</span>
+                    </div>
 
-                        <div class="mb-4">
-                            <p class="text-[10px] font-black uppercase mb-1 ${status === 'danger' ? 'text-red-500' : status === 'success' ? 'text-emerald-500' : 'text-gray-400'}">
-                                ${advice}
-                            </p>
-                            <p class="text-xs text-gray-400 font-bold leading-relaxed">${desc}</p>
+                    <div class="bg-black/50 p-4 rounded-2xl mb-4 border border-white/5">
+                        <p class="text-[9px] text-gray-500 font-bold mb-1 uppercase">診斷建議</p>
+                        <p class="text-xs font-bold text-white leading-relaxed">${advice}</p>
+                    </div>
+
+                    <div class="bg-emerald-500/10 p-4 rounded-2xl mb-4">
+                        <p class="text-[8px] text-emerald-500 font-black mb-1 uppercase tracking-widest">單筆保命投入量 (${currency})</p>
+                        <p class="text-3xl font-black text-emerald-500 font-mono italic">$ ${suggest}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-[10px] font-black text-gray-600">
+                        <div class="bg-white/5 p-2 rounded-xl text-center">
+                            <p>現價: <span class="text-white">$${current.toFixed(2)}</span></p>
                         </div>
-
-                        <div class="bg-black/50 p-4 rounded-2xl mb-4 border border-white/5">
-                            <p class="text-[8px] text-emerald-500 font-black mb-1 uppercase tracking-widest">建議投入量 (${currency})</p>
-                            <p class="text-2xl font-black text-emerald-500 font-mono italic">$ ${suggest}</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2 text-[9px] font-bold text-gray-600">
-                            <div class="bg-white/5 p-2 rounded-xl text-center">
-                                <p>現價: <span class="text-white">$${item.price}</span></p>
-                            </div>
-                            <div class="bg-white/5 p-2 rounded-xl text-center">
-                                <p>RSI: <span class="text-white">${item.rsi}</span></p>
-                            </div>
+                        <div class="bg-white/5 p-2 rounded-xl text-center">
+                            <p>RSI: <span class="text-white">${rsi.toFixed(1)}</span></p>
                         </div>
                     </div>
-                `;
-            });
-            container.innerHTML = html;
+                </div>`;
         }
 
-        // 初始執行一次
-        window.onload = runDiagnostic;
+        function calcRSI(p) {
+            let g=0, l=0;
+            for(let i=p.length-14; i<p.length; i++) {
+                let d=p[i]-p[i-1]; d>=0 ? g+=d : l-=d;
+            }
+            return l===0 ? 100 : 100-(100/(1+(g/14)/(l/14)));
+        }
+
+        function switchMarket(m) {
+            document.getElementById('tw-section').classList.toggle('hidden', m!=='tw');
+            document.getElementById('us-section').classList.toggle('hidden', m!=='us');
+            document.getElementById('btn-tw').className = `pb-4 ${m==='tw'?'tab-active':'text-gray-500'}`;
+            document.getElementById('btn-us').className = `pb-4 ${m==='us'?'tab-active':'text-gray-500'}`;
+        }
     </script>
 </body>
 </html>
