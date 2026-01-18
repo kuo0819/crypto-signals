@@ -13,8 +13,11 @@
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         .card-gradient { background: linear-gradient(145deg, #111111 0%, #050505 100%); }
-        /* 霓虹燈效果 */
         .neon-text { text-shadow: 0 0 10px rgba(234, 179, 8, 0.8), 0 0 20px rgba(234, 179, 8, 0.4); }
+        /* 滾動條美化 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8">
@@ -35,7 +38,7 @@
                     <h1 class="text-4xl font-black text-yellow-500 tracking-tighter italic flex items-center gap-2">
                         <span>🍀</span> 韭菜保命符
                     </h1>
-                    <p class="text-xs text-gray-400 mt-2 font-bold tracking-widest uppercase">Leek Protector v2.1 | 守護本金是唯一真理</p>
+                    <p class="text-xs text-gray-400 mt-2 font-bold tracking-widest uppercase">Leek Protector v2.5 | 守護本金是唯一真理</p>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full lg:w-auto bg-black/40 p-5 rounded-2xl border border-gray-800">
@@ -44,9 +47,9 @@
                         <input type="number" id="total-capital" placeholder="例如: 1000" oninput="saveAndAnalyze()" class="calc-input w-full text-xl">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-xs font-black text-gray-500 block">🤖 TG 通知設定 (隱私加密)</label>
+                        <label class="text-xs font-black text-gray-500 block">🤖 TG 通知設定 (隱私加密儲存)</label>
                         <div class="flex gap-2">
-                            <input type="password" id="tg-token" placeholder="TG Token" oninput="saveAndAnalyze()" class="calc-input text-xs w-full">
+                            <input type="password" id="tg-token" placeholder="Bot Token" oninput="saveAndAnalyze()" class="calc-input text-xs w-full">
                             <input type="text" id="tg-id" placeholder="Chat ID" oninput="saveAndAnalyze()" class="calc-input text-xs w-full">
                         </div>
                     </div>
@@ -56,22 +59,22 @@
 
         <section class="mb-8 bg-gray-900/50 p-5 rounded-2xl border border-gray-800">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="text-sm font-black text-gray-400">🌍 全球路況統計 (全市場情緒)</h3>
+                <h3 class="text-sm font-black text-gray-400">🌍 全球路況統計 (市場廣度)</h3>
                 <span id="market-status-text" class="text-xs font-bold px-3 py-1 rounded-full bg-black">掃描中...</span>
             </div>
-            <div class="w-full bg-gray-800 h-5 rounded-full overflow-hidden flex shadow-inner">
+            <div class="w-full bg-gray-800 h-4 rounded-full overflow-hidden flex shadow-inner">
                 <div id="bull-bar" class="bg-gradient-to-r from-green-600 to-green-400 h-full transition-all duration-1000" style="width: 50%"></div>
             </div>
-            <div class="flex justify-between text-[10px] mt-2 text-gray-500 font-bold">
-                <span>🟢 漲勢家數: <span id="bull-count">0</span></span>
-                <span>🔴 跌勢家數: <span id="bear-count">0</span></span>
+            <div class="flex justify-between text-[10px] mt-2 text-gray-500 font-bold uppercase tracking-wider">
+                <span>🟢 多頭氣氛: <span id="bull-count" class="text-green-500">0</span></span>
+                <span>🔴 空頭氣氛: <span id="bear-count" class="text-red-500">0</span></span>
             </div>
         </section>
 
         <nav class="flex space-x-12 mb-8 border-b border-gray-800 font-black text-sm text-gray-500">
-            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-4 tab-active transition-all">💎 撿便宜區</button>
-            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-4 hover:text-gray-300">🚀 強勢衝刺區</button>
-            <button onclick="switchTab('all')" id="btn-all" class="pb-4 hover:text-gray-300">🔍 全球掃描</button>
+            <button onclick="switchTab('oversold')" id="btn-oversold" class="pb-4 tab-active transition-all">💎 撿便宜區 (超跌)</button>
+            <button onclick="switchTab('breakout')" id="btn-breakout" class="pb-4 hover:text-gray-300">🚀 衝刺區 (強勢)</button>
+            <button onclick="switchTab('all')" id="btn-all" class="pb-4 hover:text-gray-300">🔍 全球掃描儀</button>
         </nav>
 
         <div id="oversold-section"><div id="oversold-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div></div>
@@ -80,21 +83,23 @@
             <div class="bg-gray-900 rounded-3xl overflow-hidden border border-gray-800 shadow-2xl">
                 <table class="w-full text-left text-xs font-bold">
                     <thead class="bg-gray-800/50 text-gray-400 uppercase">
-                        <tr><th class="p-5">貨幣</th><th class="p-5">目前價格</th><th class="p-5">路況坡度</th><th class="p-5">大戶動力</th></tr>
+                        <tr><th class="p-5">貨幣</th><th class="p-5">當前價格</th><th class="p-5">EMA200 趨勢</th><th class="p-5">大戶動能</th></tr>
                     </thead>
-                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono"></tbody>
+                    <tbody id="full-tbody" class="divide-y divide-gray-800 font-mono text-gray-300"></tbody>
                 </table>
             </div>
         </div>
 
-        <footer class="mt-16 p-8 bg-red-950/20 border border-red-900/30 rounded-3xl text-center">
+        <footer class="mt-16 p-8 bg-red-950/10 border border-red-900/20 rounded-3xl text-center">
             <p class="text-red-500 font-black mb-2 italic">⚠️ 韭菜警語：系統僅供參考，請嚴格執行停損，不要與趨勢作對。</p>
-            <p class="text-gray-600 text-[10px]">Protector K Engineering | 韭菜保命符 v2.1</p>
+            <p class="text-gray-600 text-[10px] tracking-widest font-bold">PROTECTOR K ENGINEERING | GLOBAL MARKET SCANNER v2.5</p>
         </footer>
     </div>
 
     <script>
         let sentSignals = new Set();
+        // 使用 api1 備用節點，穩定性更高
+        const BASE_API = "https://api1.binance.com";
 
         window.onload = () => {
             document.getElementById('total-capital').value = localStorage.getItem('capital') || 1000;
@@ -114,13 +119,13 @@
             const token = document.getElementById('tg-token').value;
             const chatId = document.getElementById('tg-id').value;
             if (!token || !chatId) return;
-            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
             try { await fetch(url); } catch (e) { console.error("TG 發送失敗"); }
         }
 
         async function analyze() {
             const capital = parseFloat(document.getElementById('total-capital').value) || 0;
-            const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+            const res = await fetch(`${BASE_API}/api/v3/ticker/24hr`);
             const data = await res.json();
             const top50 = data.filter(d => d.symbol.endsWith('USDT')).sort((a, b) => b.quoteVolume - a.quoteVolume).slice(0, 50);
 
@@ -128,7 +133,7 @@
             document.getElementById('bull-bar').style.width = `${(bulls/50)*100}%`;
             document.getElementById('bull-count').innerText = bulls;
             document.getElementById('bear-count').innerText = 50 - bulls;
-            document.getElementById('market-status-text').innerText = bulls > 25 ? "📈 多頭佔優" : "📉 空頭主導";
+            document.getElementById('market-status-text').innerText = bulls > 25 ? "📈 多頭市場" : "📉 空頭市場";
 
             const lists = { oversold: document.getElementById('oversold-list'), breakout: document.getElementById('breakout-list') };
             lists.oversold.innerHTML = ''; lists.breakout.innerHTML = '';
@@ -136,7 +141,7 @@
 
             for (let coin of top50) {
                 try {
-                    const kRes = await fetch(`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=200`);
+                    const kRes = await fetch(`${BASE_API}/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=200`);
                     const kData = await kRes.json();
                     const closes = kData.map(d => parseFloat(d[4]));
                     const volumes = kData.map(d => parseFloat(d[5]));
@@ -149,11 +154,11 @@
                     const isSafe = volConfirm && isAboveEMA;
                     const suggestAmount = (capital * 0.15).toFixed(2);
 
+                    // 核心判斷：進場訊號發送
                     if (isSafe && (rsi < 32 || rsi > 68) && !sentSignals.has(coin.symbol)) {
                         const stop = (price * 0.97).toFixed(4);
-                        const tp1 = (price * 1.04).toFixed(4);
-                        const tp2 = (price * 1.08).toFixed(4);
-                        const msg = `🍀 韭菜保命符：發現機會！\n\n幣種：${coin.symbol}\n進場：$${price}\n建議：$${suggestAmount} USDT\n\n🛑 止損：$${stop}\n🎯 目標1：$${tp1}\n🎯 目標2：$${tp2}\n\nBY PROTECTOR K`;
+                        const tp1 = (price * 1.05).toFixed(4);
+                        const msg = `<b>🍀 韭菜保命符訊號</b>\n\n幣種：<b>${coin.symbol}</b>\n進場價：$${price}\n建議投入：$${suggestAmount} USDT\n\n🛑 止損：$${stop}\n🎯 目標：$${tp1}\n\n<i>BY PROTECTOR K</i>`;
                         sendToTelegram(msg);
                         sentSignals.add(coin.symbol);
                         setTimeout(() => sentSignals.delete(coin.symbol), 3600000);
@@ -166,9 +171,9 @@
                     document.getElementById('full-tbody').innerHTML += `
                         <tr class="hover:bg-gray-800/30 transition-colors">
                             <td class="p-5 font-black text-yellow-500">${coin.symbol}</td>
-                            <td class="p-5 font-bold">$${price}</td>
-                            <td class="p-5 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-black">${isAboveEMA ? '✅ 安全' : '❌ 危險'}</td>
-                            <td class="p-5 ${volConfirm ? 'text-green-500' : 'text-gray-600'}">${volConfirm ? '🔥 充足' : '平淡'}</td>
+                            <td class="p-5 font-bold tracking-tighter text-white">$${price}</td>
+                            <td class="p-5 ${isAboveEMA ? 'text-green-500' : 'text-red-500'} font-black">${isAboveEMA ? '🟢 多頭上坡' : '🔴 空頭下坡'}</td>
+                            <td class="p-5 ${volConfirm ? 'text-green-500' : 'text-gray-700'}">${volConfirm ? '🔥 爆量確認' : '低迷'}</td>
                         </tr>`;
                 } catch(e) {}
             }
@@ -186,17 +191,17 @@
                     </div>
                     <div class="space-y-4 mb-8">
                         <div class="flex justify-between items-center bg-red-950/30 p-3 rounded-xl">
-                            <span class="text-xs text-red-500 font-black">🛑 停損:</span>
+                            <span class="text-xs text-red-500 font-black tracking-widest uppercase">🛑 嚴格停損:</span>
                             <span class="text-sm font-mono text-red-500 font-black">$${(price*0.97).toFixed(4)}</span>
                         </div>
                         <div class="flex justify-between items-center bg-green-950/30 p-3 rounded-xl">
-                            <span class="text-xs text-green-500 font-black">🎯 獲利:</span>
+                            <span class="text-xs text-green-500 font-black tracking-widest uppercase">🎯 止盈目標:</span>
                             <span class="text-sm font-mono text-green-400 font-black">$${(price*1.05).toFixed(4)}</span>
                         </div>
                     </div>
-                    <div class="flex justify-between text-[10px] font-black opacity-60">
-                        <span>🚥 路況: ${isAboveEMA?'✅':'❌'}</span>
-                        <span>⛽ 動力: ${volConfirm?'🔥':'☁️'}</span>
+                    <div class="flex justify-between text-[10px] font-black opacity-40 uppercase tracking-tighter">
+                        <span>EMA200: ${isAboveEMA?'SAFE':'DANGER'}</span>
+                        <span>VOL: ${volConfirm?'OK':'WAIT'}</span>
                     </div>
                 </div>`;
         }
@@ -207,6 +212,7 @@
                 let d=prices[i]-prices[i-1];
                 d>=0 ? g+=d : l-=d;
             }
+            if(l === 0) return 100;
             return 100 - (100/(1+(g/14)/(l/14)));
         }
 
@@ -224,6 +230,7 @@
             });
         }
 
+        // 每 5 分鐘掃描一次
         setInterval(analyze, 300000);
     </script>
 </body>
