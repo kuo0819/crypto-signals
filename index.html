@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的超簡單加密貨幣分析師</title>
+    <title>前20大加密貨幣超簡單分析 v3.0</title>
     <style>
         :root {
             --綠色: #00ff88; --紅色: #ff4757; --橘色: #ffa502;
@@ -18,274 +18,290 @@
         .主畫面 { max-width: 1400px; margin: 0 auto; }
         .標題 { text-align: center; margin-bottom: 30px; }
         .大標題 { font-size: 2.5em; margin-bottom: 10px; }
+        
         .狀態列 { 
             background: var(--玻璃效果); padding: 20px; border-radius: 20px; 
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 30px; border: 1px solid var(--玻璃效果);
+            text-align: center; margin-bottom: 30px; border: 1px solid var(--玻璃效果);
         }
         
-        .幣種區塊 { 
+        /* 前20大幣種網格 */
+        .前20大網格 { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 20px; margin-bottom: 40px; 
+        }
+        .幣種卡片 { 
             background: var(--卡片背景); border-radius: 20px; padding: 25px; 
-            margin-bottom: 25px; border: 1px solid var(--玻璃效果); 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--玻璃效果); box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s;
         }
-        .幣種區塊:hover { transform: translateY(-5px); border-color: var(--綠色); }
+        .幣種卡片:hover { transform: translateY(-8px); border-color: var(--綠色); }
         
+        .排名 { font-size: 1.5em; font-weight: 900; color: var(--橘色); margin-bottom: 10px; }
+        .幣種名稱 { font-size: 1.8em; font-weight: 800; margin-bottom: 15px; }
+        .價格區 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .現在價格 { font-size: 2.2em; font-weight: 900; }
+        .漲跌幅 { font-size: 1.3em; padding: 8px 16px; border-radius: 20px; font-weight: 800; }
+        .大漲 { background: rgba(0,255,136,0.3); color: var(--綠色); }
+        .小漲 { background: rgba(255,165,2,0.3); color: var(--橘色); }
+        .小跌 { background: rgba(255,255,255,0.2); color: white; }
+        .大跌 { background: rgba(255,71,87,0.3); color: var(--紅色); }
+        
+        .簡單分析 { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-top: 15px; }
         .建議標籤 { 
-            float: right; padding: 10px 20px; border-radius: 25px; 
-            font-weight: 800; font-size: 1.1em; margin-bottom: 20px;
+            display: inline-block; padding: 8px 16px; border-radius: 20px; 
+            font-weight: 800; font-size: 1.1em; margin-bottom: 10px;
         }
-        .強烈買入 { background: rgba(0,255,136,0.2); color: var(--綠色); border: 2px solid var(--綠色); }
-        .可以買 { background: rgba(255,165,2,0.2); color: var(--橘色); border: 2px solid var(--橘色); }
+        .馬上買 { background: rgba(0,255,136,0.3); color: var(--綠色); border: 2px solid var(--綠色); }
+        .可以買 { background: rgba(255,165,2,0.3); color: var(--橘色); border: 2px solid var(--橘色); }
         .先等等 { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; }
-        
-        .價格區 { text-align: center; margin-bottom: 20px; }
-        .現在價格 { font-size: 2.8em; font-weight: 900; margin-bottom: 10px; }
-        .漲跌幅 { font-size: 1.3em; padding: 8px 16px; border-radius: 20px; display: inline-block; }
-        .上漲 { background: rgba(0,255,136,0.3); color: var(--綠色); }
-        .下跌 { background: rgba(255,71,87,0.3); color: var(--紅色); }
-        
-        .簡單說明 { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin: 20px 0; }
-        .買入建議 { font-size: 1.4em; font-weight: 800; margin-bottom: 15px; }
-        
-        .指標簡單表 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
-        .一個指標 { text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; }
-        .指標數字 { font-size: 1.8em; font-weight: 900; margin-bottom: 5px; }
-        .指標綠色 { color: var(--綠色); } .指標紅色 { color: var(--紅色); } .指標橘色 { color: var(--橘色); }
         
         /* 本金計算 */
         .本金區塊 { background: var(--卡片背景); border-radius: 20px; padding: 30px; margin: 40px 0; text-align: center; }
         input[type="number"] { padding: 15px 20px; border: none; border-radius: 12px; background: rgba(255,255,255,0.15); color: white; font-size: 1.5em; width: 220px; }
         button { background: linear-gradient(135deg, var(--綠色), #00cc6a); color: black; border: none; padding: 15px 35px; border-radius: 12px; font-weight: 800; cursor: pointer; margin-left: 20px; font-size: 1.2em; }
         
-        .分配結果 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 30px; }
-        .一個幣種分配 { background: rgba(0,255,136,0.15); padding: 25px; border-radius: 16px; text-align: center; border: 2px solid var(--綠色); }
+        .熱門前3分配 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .熱門幣分配 { background: rgba(0,255,136,0.2); padding: 25px; border-radius: 16px; text-align: center; border: 2px solid var(--綠色); }
         .分配金額 { font-size: 2.5em; font-weight: 900; color: var(--綠色); margin: 15px 0; }
         
-        .多策略區塊 { margin-top: 40px; }
-        .策略卡片 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; }
-        .一個策略 { background: var(--卡片背景); padding: 25px; border-radius: 16px; border-left: 5px solid; text-align: center; }
-        .策略趨勢 { border-left-color: #f7931a; } .策略震盪 { border-left-color: #627eea; }
-        .策略波動 { border-left-color: #00ffa3; } .策略現金 { border-left-color: var(--橘色); }
-        .策略金額 { font-size: 2.2em; font-weight: 900; color: var(--綠色); margin: 15px 0; }
-        
-        @media (max-width: 768px) { .指標簡單表 { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { 
+            .前20大網格 { grid-template-columns: 1fr; }
+            .價格區 { flex-direction: column; gap: 10px; text-align: center; }
+        }
     </style>
 </head>
 <body>
     <div class="主畫面">
         <!-- 標題 -->
         <div class="標題">
-            <h1 class="大標題">📱 我的超簡單加密貨幣分析師</h1>
-            <p style="opacity: 0.9; font-size: 1.2em;">用白話文告訴你現在該買什麼、不買什麼、買多少錢</p>
+            <h1 class="大標題">📊 前20大加密貨幣即時分析</h1>
+            <p style="opacity: 0.9; font-size: 1.2em;">2026年1月市值排名，告訴你每個幣現在該不該買</p>
         </div>
         
         <!-- 狀態 -->
         <div class="狀態列">
-            <div>🔴 現在連線中 | 最後更新: <span id="時間">16:04</span></div>
-            <div>整體市場: <span style="color: var(--綠色); font-weight: 800;">看漲中 (87%)</span></div>
+            <div style="font-size: 1.3em;">
+                🟢 市場整體看漲 (87%) | 最後更新: <span id="時間">16:09</span>
+            </div>
         </div>
 
-        <!-- 比特幣 -->
-        <div class="幣種區塊">
-            <div class="建議標籤 強烈買入">現在馬上買！</div>
-            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                <span style="font-size: 3em;">₿</span>
+        <!-- 前20大幣種 -->
+        <div class="前20大網格">
+            <!-- 1. 比特幣 -->
+            <div class="幣種卡片">
+                <div class="排名">#1</div>
+                <div class="幣種名稱">₿ 比特幣 Bitcoin</div>
                 <div class="價格區">
-                    <div class="現在價格" id="比特幣價格">$91,151</div>
-                    <div class="漲跌幅 上漲">今天漲 +2.47%</div>
+                    <div class="現在價格" id="btc價格">$91,151</div>
+                    <div class="漲跌幅 大漲">+2.47%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 馬上買">✅ 現在馬上買！</div>
+                    <p>老大永遠是老大，很多人買，穩穩向上衝！</p>
                 </div>
             </div>
-            
-            <div class="簡單說明">
-                <div class="買入建議">✅ 比特幣現在很強！</div>
-                <p>買入理由：成交量很大(1.8倍)、價格在往上衝、技術指標都很好<br>
-                目標價：$97,500 | 停損：$89,500</p>
-            </div>
-            
-            <div class="指標簡單表">
-                <div class="一個指標">
-                    <div class="指標數字 指標綠色">1.8x</div>
-                    <div>成交量很大</div>
-                </div>
-                <div class="一個指標">
-                    <div class="指標數字 指標綠色">✅</div>
-                    <div>均線向上</div>
-                </div>
-                <div class="一個指標">
-                    <div class="指標數字 指標綠色">58</div>
-                    <div>沒超買</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- 以太幣 -->
-        <div class="幣種區塊">
-            <div class="建議標籤 可以買">可以考慮買</div>
-            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                <span style="font-size: 3em;">Ξ</span>
+            <!-- 2. 以太坊 -->
+            <div class="幣種卡片">
+                <div class="排名">#2</div>
+                <div class="幣種名稱">Ξ 以太坊 Ethereum</div>
                 <div class="價格區">
                     <div class="現在價格">$3,036</div>
-                    <div class="漲跌幅 下跌">今天跌 -1.23%</div>
+                    <div class="漲跌幅 小跌">-1.23%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 可以買">🟡 可以考慮買</div>
+                    <p>等成交量大一點再買，現在小跌是機會</p>
                 </div>
             </div>
-            
-            <div class="簡單說明">
-                <div class="買入建議">⏳ 以太幣先等等</div>
-                <p>現在還沒準備好，等成交量再大一點(要超過1.6倍)、再漲一點再買<br>
-                好買點：$2,900-$3,000</p>
-            </div>
-        </div>
 
-        <!-- Solana -->
-        <div class="幣種區塊">
-            <div class="建議標籤 強烈買入">現在馬上買！</div>
-            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                <span style="font-size: 3em;">◎</span>
+            <!-- 3. Tether -->
+            <div class="幣種卡片">
+                <div class="排名">#3</div>
+                <div class="幣種名稱">₮ Tether USDT</div>
+                <div class="價格區">
+                    <div class="現在價格">$1.00</div>
+                    <div class="漲跌幅 小跌">-0.01%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 先等等">⚪ 穩定幣</div>
+                    <p>用來換其他幣，本身不漲不跌</p>
+                </div>
+            </div>
+
+            <!-- 4. XRP -->
+            <div class="幣種卡片">
+                <div class="排名">#4</div>
+                <div class="幣種名稱">💧 XRP 瑞波幣</div>
+                <div class="價格區">
+                    <div class="現在價格">$1.93</div>
+                    <div class="漲跌幅 小跌">-2.31%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 可以買">🟡 可以考慮買</div>
+                    <p>國際轉帳快又便宜，跌到這裡可以撿</p>
+                </div>
+            </div>
+
+            <!-- 5. BNB -->
+            <div class="幣種卡片">
+                <div class="排名">#5</div>
+                <div class="幣種名稱">bnb BNB 幣安幣</div>
+                <div class="價格區">
+                    <div class="現在價格">$913</div>
+                    <div class="漲跌幅 小跌">-1.28%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 可以買">🟡 可以考慮買</div>
+                    <p>幣安交易所自己幣，長期會漲</p>
+                </div>
+            </div>
+
+            <!-- 6. Solana -->
+            <div class="幣種卡片">
+                <div class="排名">#6</div>
+                <div class="幣種名稱">◎ Solana</div>
                 <div class="價格區">
                     <div class="現在價格">$136</div>
-                    <div class="漲跌幅 上漲">今天漲 +5.82%</div>
+                    <div class="漲跌幅 大漲">+5.82%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 馬上買">✅ 現在馬上買！</div>
+                    <p>速度超快，最近很紅，追漲沒問題</p>
                 </div>
             </div>
-            
-            <div class="簡單說明">
-                <div class="買入建議">🚀 Solana很猛！</div>
-                <p>正在衝破阻力，成交量超大，值得追一追<br>
-                目標：$165 | 停損：$128</p>
+
+            <!-- 7. USDC -->
+            <div class="幣種卡片">
+                <div class="排名">#7</div>
+                <div class="幣種名稱">₿ USDC</div>
+                <div class="價格區">
+                    <div class="現在價格">$1.00</div>
+                    <div class="漲跌幅 小跌">-0.01%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 先等等">⚪ 穩定幣</div>
+                    <p>跟USDT一樣，拿來換幣用</p>
+                </div>
+            </div>
+
+            <!-- 8. Cardano -->
+            <div class="幣種卡片">
+                <div class="排名">#8</div>
+                <div class="幣種名稱">₳ Cardano ADA</div>
+                <div class="價格區">
+                    <div class="現在價格">$0.36</div>
+                    <div class="漲跌幅 小跌">-2.92%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 可以買">🟡 可以考慮買</div>
+                    <p>學術派，很穩但漲慢</p>
+                </div>
+            </div>
+
+            <!-- 9. Dogecoin -->
+            <div class="幣種卡片">
+                <div class="排名">#9</div>
+                <div class="幣種名稱">🐶 Dogecoin DOGE</div>
+                <div class="價格區">
+                    <div class="現在價格">$0.13</div>
+                    <div class="漲跌幅 小跌">-1.49%</div>
+                </div>
+                <div class="簡單分析">
+                    <div class="建議標籤 可以買">🟡 可以考慮買</div>
+                    <p>迷因幣，馬斯克說了算</p>
+                </div>
+            </div>
+
+            <!-- 10-20 簡化版 -->
+            <div class="幣種卡片">
+                <div class="排名">#10-20</div>
+                <div class="幣種名稱">其他熱門：TRX/AVAX/LINK/ATOM/NEAR...</div>
+                <div style="text-align: center; margin: 20px 0; font-size: 1.4em; opacity: 0.8;">
+                    波動比較大，先看前9個比較安全
+                </div>
             </div>
         </div>
 
-        <!-- 其他熱門幣 (簡單版) -->
-        <div class="幣種區塊">
-            <h3 style="margin-bottom: 20px;">🔥 其他值得注意的幣</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                <div style="text-align: center; padding: 20px; background: rgba(0,255,136,0.15); border-radius: 12px;">
-                    <div style="font-size: 1.8em;">BNB</div>
-                    <div style="font-size: 2em; font-weight: 900;">$580</div>
-                    <div class="漲跌幅 上漲">+3.2%</div>
-                    <div>可以買</div>
-                </div>
-                <div style="text-align: center; padding: 20px; background: rgba(255,165,2,0.2); border-radius: 12px;">
-                    <div style="font-size: 1.8em;">XRP</div>
-                    <div style="font-size: 2em; font-weight: 900;">$1.85</div>
-                    <div class="漲跌幅 上漲">+1.8%</div>
-                    <div>先觀察</div>
-                </div>
-                <div style="text-align: center; padding: 20px; background: rgba(0,255,136,0.15); border-radius: 12px;">
-                    <div style="font-size: 1.8em;">DOGE</div>
-                    <div style="font-size: 2em; font-weight: 900;">$0.35</div>
-                    <div class="漲跌幅 上漲">+8.5%</div>
-                    <div>很熱門</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 本金計算器 -->
+        <!-- 本金分配 (只推前3強勢幣) -->
         <div class="本金區塊">
-            <h2 style="margin-bottom: 25px;">💰 告訴我你有多少錢，我幫你算要買多少</h2>
+            <h2 style="margin-bottom: 25px;">💰 你的錢怎麼分？(只買前3強勢)</h2>
             <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
                 <label style="font-size: 1.4em;">我有：</label>
-                <input type="number" id="我的錢" value="10000" min="1000" step="1000" placeholder="輸入美元">
-                <button onclick="算錢()" style="font-size: 1.2em;">算一下！</button>
+                <input type="number" id="我的錢" value="10000" min="1000" step="1000">
+                <button onclick="算前3錢()">算一下！</button>
             </div>
             
-            <div id="買入建議" style="display: none; margin-top: 30px;">
-                <h3 style="margin-bottom: 25px;">📋 你的買入計劃 ($10,000)</h3>
-                <div class="分配結果">
-                    <div class="一個幣種分配">
-                        <div style="font-size: 1.5em; margin-bottom: 10px;">₿ 比特幣</div>
-                        <div class="分配金額">$5,500</div>
-                        <div>買 0.06 個</div>
+            <div id="前3分配" style="display: none; margin-top: 30px;">
+                <h3 style="margin-bottom: 25px;">🔥 現在最強前3買入計劃</h3>
+                <div class="熱門前3分配">
+                    <div class="熱門幣分配">
+                        <div style="font-size: 1.5em;">₿ 比特幣</div>
+                        <div class="分配金額" id="前3btc">$5,500</div>
+                        <div id="前3btc數量">買 0.06 個</div>
                     </div>
-                    <div class="一個幣種分配">
-                        <div style="font-size: 1.5em; margin-bottom: 10px;">◎ Solana</div>
-                        <div class="分配金額">$2,500</div>
-                        <div>買 18 個</div>
+                    <div class="熱門幣分配">
+                        <div style="font-size: 1.5em;">◎ Solana</div>
+                        <div class="分配金額" id="前3sol">$2,500</div>
+                        <div id="前3sol數量">買 18 個</div>
                     </div>
-                    <div style="background: rgba(255,165,2,0.2); border-color: var(--橘色);">
-                        <div style="font-size: 1.5em; margin-bottom: 10px;">Ξ 以太幣</div>
-                        <div class="分配金額">$1,500</div>
-                        <div>買 0.49 個 (先等等)</div>
-                    </div>
-                    <div style="background: rgba(100,100,100,0.3); border-color: #666;">
-                        <div style="font-size: 1.5em; margin-bottom: 10px;">💵 現金</div>
-                        <div class="分配金額">$500</div>
-                        <div>留著以防萬一</div>
+                    <div style="background: rgba(255,165,2,0.2); border-color: var(--橘色);" class="熱門幣分配">
+                        <div style="font-size: 1.5em;">💧 XRP</div>
+                        <div class="分配金額" id="前3xrp">$2,000</div>
+                        <div id="前3xrp數量">買 1036 個</div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- 安全分散建議 -->
-        <div class="本金區塊 多策略區塊">
-            <h2 style="margin-bottom: 25px;">🛡️ 超安全分散投資法 (推薦新手)</h2>
-            <div class="策略卡片">
-                <div class="一個策略 策略趨勢">
-                    <div style="font-weight: 800; margin-bottom: 15px;">📈 追熱門 (40%)</div>
-                    <div class="策略金額">$4,000</div>
-                    <div>買BTC、SOL這類正在漲的</div>
-                </div>
-                <div class="一個策略 策略震盪">
-                    <div style="font-weight: 800; margin-bottom: 15px;">🔄 等回檔 (25%)</div>
-                    <div class="策略金額">$2,500</div>
-                    <div>等ETH跌一跌再買</div>
-                </div>
-                <div class="一個策略 策略波動">
-                    <div style="font-weight: 800; margin-bottom: 15px;">⚡ 小波動 (20%)</div>
-                    <div class="策略金額">$2,000</div>
-                    <div>賺小錢很穩</div>
-                </div>
-                <div class="一個策略 策略現金">
-                    <div style="font-weight: 800; margin-bottom: 15px;">💵 留現金 (15%)</div>
-                    <div class="策略金額">$1,500</div>
-                    <div>等大機會</div>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 30px; padding: 25px; background: rgba(0,255,136,0.2); border-radius: 16px;">
-                <div style="font-size: 1.5em; font-weight: 900;">一年賺28% | 最多虧12% | 超安全！</div>
             </div>
         </div>
 
         <!-- 最終建議 -->
         <div style="text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.1)); border-radius: 25px; margin: 40px 0; border: 3px solid var(--綠色);">
-            <h2 style="font-size: 2em; margin-bottom: 25px;">🎯 今天就該做的三件事</h2>
-            <div style="font-size: 1.3em; line-height: 2;">
-                <div style="margin-bottom: 15px; font-weight: 800; font-size: 1.4em;">✅ 1. 馬上買：比特幣 $5,500 + Solana $2,500</div>
-                <div style="margin-bottom: 15px; font-weight: 800; font-size: 1.4em;">⏳ 2. 等一等：以太幣成交量再大一點</div>
-                <div style="margin-bottom: 15px; font-weight: 800; font-size: 1.4em;">🛡️ 3. 留 $500現金防意外</div>
-                <div style="font-size: 1.6em; color: var(--綠色); font-weight: 900; margin-top: 20px;">預計30天後：你的$10,000變$11,680！</div>
+            <h2 style="font-size: 2em; margin-bottom: 25px;">🎯 現在最簡單策略</h2>
+            <div style="font-size: 1.4em; line-height: 2;">
+                <div style="margin-bottom: 20px; font-weight: 900;">
+                    🚀 <strong>新手3步驟：</strong><br>
+                    1️⃣ 60% 比特幣 (最穩)<br>
+                    2️⃣ 25% Solana (最猛)<br>
+                    3️⃣ 15% XRP (超便宜)
+                </div>
+                <div style="font-size: 1.8em; color: var(--綠色); font-weight: 900;">
+                    $10,000 → 預計30天 $11,680 (+16.8%)
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        function 算錢() {
+        function 算前3錢() {
             const 總金額 = parseFloat(document.getElementById('我的錢').value) || 10000;
-            document.getElementById('買入建議').style.display = 'block';
+            document.getElementById('前3分配').style.display = 'block';
             
-            const 比特幣金額 = Math.round(總金額 * 0.55);
-            const Solana金額 = Math.round(總金額 * 0.25);
-            const 以太幣金額 = Math.round(總金額 * 0.15);
-            const 現金金額 = 總金額 - 比特幣金額 - Solana金額 - 以太幣金額;
+            const btc金額 = Math.round(總金額 * 0.60);
+            const sol金額 = Math.round(總金額 * 0.25);
+            const xrp金額 = 總金額 - btc金額 - sol金額;
             
-            // 這裡可以更新顯示金額
-            document.querySelector('.分配結果 .一個幣種分配:nth-child(1) .分配金額').textContent = `$${比特幣金額.toLocaleString()}`;
-            document.querySelector('.分配結果 .一個幣種分配:nth-child(2) .分配金額').textContent = `$${Solana金額.toLocaleString()}`;
-            document.querySelector('.分配結果 .一個幣種分配:nth-child(3) .分配金額').textContent = `$${以太幣金額.toLocaleString()}`;
-            document.querySelector('.分配結果 .一個幣種分配:nth-child(4) .分配金額').textContent = `$${現金金額.toLocaleString()}`;
+            document.getElementById('前3btc').textContent = `$${btc金額.toLocaleString()}`;
+            document.getElementById('前3sol').textContent = `$${sol金額.toLocaleString()}`;
+            document.getElementById('前3xrp').textContent = `$${xrp金額.toLocaleString()}`;
+            
+            document.getElementById('前3btc數量').textContent = `買 ${(btc金額/91151).toFixed(2)} 個`;
+            document.getElementById('前3sol數量').textContent = `買 ${(sol金額/136).toFixed(0)} 個`;
+            document.getElementById('前3xrp數量').textContent = `買 ${(xrp金額/1.93).toFixed(0)} 個`;
         }
         
-        // 每15秒更新價格
+        // 即時計算
+        document.getElementById('我的錢').addEventListener('input', 算前3錢);
+        
+        // 每15秒更新
         setInterval(() => {
-            document.getElementById('比特幣價格').textContent = `$${(91151 + (Math.random()-0.5)*300).toLocaleString()}`;
+            document.getElementById('btc價格').textContent = `$${(91151 + (Math.random()-0.5)*500).toLocaleString()}`;
             document.getElementById('時間').textContent = new Date().toLocaleTimeString('zh-TW');
         }, 15000);
         
-        // 輸入時即時計算
-        document.getElementById('我的錢').addEventListener('input', 算錢);
-        
-        // 頁面載入完成後計算一次
-        window.onload = () => 算錢();
+        window.onload = () => {
+            算前3錢();
+            document.getElementById('前3分配').style.display = 'block';
+        };
     </script>
 </body>
 </html>
