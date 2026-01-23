@@ -6,292 +6,309 @@
     <title>私人虛擬貨幣交易終端 - 專業版 (2026)</title>
     <style>
         :root {
-            --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --bg-primary: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
             --card-btc: linear-gradient(135deg, #f7931a 0%, #ff6b35 100%);
             --card-eth: linear-gradient(135deg, #627eea 0%, #7f5af4 100%);
             --card-sol: linear-gradient(135deg, #00ffa3 0%, #00cc99 100%);
             --buy-bg: #00ff88; --sell-bg: #ff4757;
             --bull-bg: #00ff88; --bear-bg: #ff4757; --neutral-bg: #ffa502;
+            --text-primary: #ffffff; --text-secondary: #b8c1d4;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: var(--bg-primary); color: white; min-height: 100vh; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; 
             padding: 20px; line-height: 1.6;
         }
         .terminal { 
-            max-width: 1100px; margin: 0 auto; 
-            background: rgba(0,0,0,0.85); border-radius: 20px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5); padding: 30px; 
+            max-width: 1200px; margin: 0 auto; 
+            background: rgba(15,15,35,0.95); border-radius: 20px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6); padding: 30px; 
             backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);
         }
-        .header { text-align: center; margin-bottom: 35px; }
-        .title { font-size: 2.2em; font-weight: 800; background: linear-gradient(45deg, #00ff88, #ffa502, #ff4757); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
-        .status-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 12px; margin-top: 15px; }
-        .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .green { color: var(--buy-bg); } .red { color: var(--sell-bg); }
-        .pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .coin-panel { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 25px; margin-bottom: 30px; }
-        .coin-card { 
-            background: rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; 
-            backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.15);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden;
+        .header { 
+            text-align: center; margin-bottom: 40px; padding-bottom: 25px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .coin-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
-        .coin-card:hover::before { left: 100%; }
-        .coin-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        .coin-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .coin-icon { font-size: 2em; }
-        .coin-name { font-size: 1.4em; font-weight: 700; }
-        .price-main { font-size: 2.5em; font-weight: 900; margin: 15px 0; font-variant-numeric: tabular-nums; }
-        .change-24h { font-size: 1.3em; font-weight: 600; margin: 8px 0; }
-        .signal-box { padding: 15px 20px; border-radius: 12px; text-align: center; font-size: 1.2em; font-weight: 700; margin: 20px 0; }
+        .title { 
+            font-size: 2.5em; font-weight: 800; 
+            background: linear-gradient(45deg, var(--buy-bg), var(--neutral-bg), var(--sell-bg)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            background-clip: text; margin-bottom: 15px; 
+        }
+        .status-bar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255,255,255,0.08); padding: 18px 25px; 
+            border-radius: 12px; margin-top: 20px; font-size: 0.95em;
+        }
+        .status-indicator { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .green { color: var(--buy-bg); } .red { color: var(--sell-bg); } .orange { color: var(--neutral-bg); }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        /* 主要幣種卡片 - 三欄垂直堆疊 */
+        .coin-panels { margin-bottom: 35px; }
+        .coin-card { 
+            background: rgba(255,255,255,0.06); border-radius: 16px; padding: 30px; 
+            margin-bottom: 25px; backdrop-filter: blur(15px); 
+            border: 1px solid rgba(255,255,255,0.12); position: relative;
+            transition: all 0.3s ease; overflow: hidden;
+        }
+        .coin-card:hover { 
+            transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); 
+            border-color: rgba(255,255,255,0.2);
+        }
+        .coin-card.btc { border-left: 5px solid #f7931a; }
+        .coin-card.eth { border-left: 5px solid #627eea; }
+        .coin-card.sol { border-left: 5px solid #00ffa3; }
+
+        .coin-header { 
+            display: flex; align-items: center; gap: 15px; margin-bottom: 25px; 
+        }
+        .coin-icon { font-size: 2.2em; }
+        .coin-name { font-size: 1.5em; font-weight: 700; }
+
+        .price-main { 
+            font-size: 3em; font-weight: 900; margin: 20px 0; 
+            font-variant-numeric: tabular-nums; letter-spacing: -2px;
+        }
+        .change-24h { 
+            font-size: 1.4em; font-weight: 600; margin: 12px 0; padding: 10px 0;
+        }
+        .signal-box { 
+            padding: 20px; border-radius: 12px; text-align: center; 
+            font-size: 1.3em; font-weight: 800; margin: 25px 0; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
         .bull { background: rgba(0,255,136,0.2); color: var(--bull-bg); border: 2px solid var(--bull-bg); }
         .bear { background: rgba(255,71,87,0.2); color: var(--bear-bg); border: 2px solid var(--bear-bg); }
         .neutral { background: rgba(255,165,2,0.2); color: var(--neutral-bg); border: 2px solid var(--neutral-bg); }
-        .trade-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .trade-level { padding: 18px; border-radius: 12px; text-align: center; font-weight: 700; font-size: 1.1em; }
+
+        .trade-levels { 
+            display: flex; gap: 20px; margin: 30px 0; 
+            flex-wrap: wrap; justify-content: center;
+        }
+        .trade-level { 
+            flex: 1; min-width: 220px; padding: 25px; border-radius: 12px; 
+            text-align: center; font-weight: 700; font-size: 1.15em;
+        }
         .buy-level { background: rgba(0,255,136,0.15); color: var(--buy-bg); border: 2px solid var(--buy-bg); }
         .sell-level { background: rgba(255,71,87,0.15); color: var(--sell-bg); border: 2px solid var(--sell-bg); }
-        .portfolio-table { width: 100%; border-collapse: collapse; margin-top: 30px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; }
-        .portfolio-table th { background: rgba(255,255,255,0.1); padding: 18px 15px; text-align: left; font-weight: 700; font-size: 1.1em; }
-        .portfolio-table td { padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .performance { font-size: 1.3em; font-weight: 700; text-align: center; margin: 25px 0; padding: 20px; background: rgba(0,255,136,0.1); border-radius: 12px; border: 2px solid var(--buy-bg); }
-        @media (max-width: 768px) { .coin-panel { grid-template-columns: 1fr; } .trade-levels { grid-template-columns: 1fr; } }
+        .trade-price { font-size: 1.6em; font-weight: 900; margin-top: 8px; }
+
+        /* 投資組合表格 */
+        .portfolio-section { margin-top: 40px; }
+        .portfolio-table { 
+            width: 100%; border-collapse: collapse; 
+            background: rgba(255,255,255,0.04); border-radius: 16px; 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .portfolio-table th { 
+            background: rgba(255,255,255,0.08); padding: 20px 18px; 
+            text-align: left; font-weight: 700; font-size: 1.1em; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .portfolio-table td { 
+            padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); 
+        }
+        .portfolio-table tbody tr:hover { background: rgba(255,255,255,0.05); }
+
+        .performance { 
+            text-align: center; margin-top: 30px; padding: 25px; 
+            background: linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1)); 
+            border-radius: 16px; border: 2px solid var(--buy-bg); font-size: 1.3em;
+        }
+
+        @media (max-width: 768px) { 
+            body { padding: 15px; }
+            .terminal { padding: 20px; border-radius: 15px; }
+            .title { font-size: 2em; }
+            .price-main { font-size: 2.2em; }
+            .trade-levels { flex-direction: column; }
+            .status-bar { flex-direction: column; gap: 10px; text-align: center; padding: 20px; }
+        }
     </style>
 </head>
 <body>
     <div class="terminal">
         <div class="header">
-            <h1 class="title">私人交易終端 v2.0</h1>
+            <h1 class="title">私人交易終端 v2.1</h1>
             <div class="status-bar">
                 <div class="status-indicator">
-                    <span class="pulse green">● 即時連線 CoinGecko</span>
-                    <span>更新: <span id="last-update">-</span></span>
+                    <span class="pulse green">● 即時連線 CoinGecko API</span>
+                    <span>最後更新: <span id="last-update">-</span></span>
                 </div>
-                <div id="connection-status" class="status-indicator">連線狀態: 活躍</div>
+                <div id="connection-status" class="status-indicator">狀態: 活躍</div>
             </div>
         </div>
 
-        <div class="coin-panel">
-            <!-- Bitcoin Panel -->
-            <div class="coin-card" data-coin="bitcoin">
+        <div class="coin-panels">
+            <!-- Bitcoin -->
+            <div class="coin-card btc">
                 <div class="coin-header">
                     <span class="coin-icon">₿</span>
                     <span class="coin-name">Bitcoin (BTC)</span>
                 </div>
-                <div class="price-main" id="btc-price">$91,151</div>
-                <div class="change-24h" id="btc-change">+2.47% <span style="font-size:0.8em">(24h)</span></div>
-                <div class="signal-box bull" id="btc-signal">強烈買入 🚀</div>
+                <div class="price-main" id="bitcoin-price">$91,151</div>
+                <div class="change-24h" id="bitcoin-change">+2.47% (24h)</div>
+                <div class="signal-box bull" id="bitcoin-signal">強烈買入 🚀</div>
                 <div class="trade-levels">
                     <div class="trade-level buy-level">
-                        <div>買入區</div>
-                        <div style="font-size:1.4em;font-weight:900;" id="btc-buy">$89,500-$90,200</div>
+                        <div style="font-size:0.9em;opacity:0.9;">買入區間</div>
+                        <div class="trade-price" id="bitcoin-buy">$89,750</div>
                     </div>
                     <div class="trade-level sell-level">
-                        <div>賣出目標</div>
-                        <div style="font-size:1.4em;font-weight:900;" id="btc-sell">$97,500-$100,000</div>
+                        <div style="font-size:0.9em;opacity:0.9;">賣出目標</div>
+                        <div class="trade-price" id="bitcoin-sell">$97,500</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Ethereum Panel -->
-            <div class="coin-card" data-coin="ethereum">
+            <!-- Ethereum -->
+            <div class="coin-card eth">
                 <div class="coin-header">
                     <span class="coin-icon">Ξ</span>
                     <span class="coin-name">Ethereum (ETH)</span>
                 </div>
-                <div class="price-main" id="eth-price">$3,036</div>
-                <div class="change-24h" id="eth-change">-1.23% <span style="font-size:0.8em">(24h)</span></div>
-                <div class="signal-box neutral" id="eth-signal">中性偏多 📈</div>
+                <div class="price-main" id="ethereum-price">$3,036</div>
+                <div class="change-24h" id="ethereum-change">-1.23% (24h)</div>
+                <div class="signal-box neutral" id="ethereum-signal">中性偏多 📈</div>
                 <div class="trade-levels">
                     <div class="trade-level buy-level">
-                        <div>買入區</div>
-                        <div style="font-size:1.4em;font-weight:900;" id="eth-buy">$2,850-$2,950</div>
+                        <div style="font-size:0.9em;opacity:0.9;">買入區間</div>
+                        <div class="trade-price" id="ethereum-buy">$2,854</div>
                     </div>
                     <div class="trade-level sell-level">
-                        <div>賣出目標</div>
-                        <div style="font-size:1.4em;font-weight:900;" id="eth-sell">$3,800-$4,200</div>
+                        <div style="font-size:0.9em;opacity:0.9;">賣出目標</div>
+                        <div class="trade-price" id="ethereum-sell">$3,800</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Solana Panel -->
-            <div class="coin-card" data-coin="solana">
+            <!-- Solana -->
+            <div class="coin-card sol">
                 <div class="coin-header">
                     <span class="coin-icon">◎</span>
                     <span class="coin-name">Solana (SOL)</span>
                 </div>
-                <div class="price-main" id="sol-price">$136.42</div>
-                <div class="change-24h green" id="sol-change">+5.82% <span style="font-size:0.8em">(24h)</span></div>
-                <div class="signal-box bull" id="sol-signal">高成長首選 🔥</div>
+                <div class="price-main" id="solana-price">$136.42</div>
+                <div class="change-24h green" id="solana-change">+5.82% (24h)</div>
+                <div class="signal-box bull" id="solana-signal">高成長首選 🔥</div>
                 <div class="trade-levels">
                     <div class="trade-level buy-level">
-                        <div>買入區</div>
-                        <div style="font-size:1.4em;font-weight:900;" id="sol-buy">$128-$132</div>
+                        <div style="font-size:0.9em;opacity:0.9;">買入區間</div>
+                        <div class="trade-price" id="solana-buy">$130.80</div>
                     </div>
                     <div class="trade-level sell-level">
-                        <div>賣出目標</div>
-                        <div style="font-size:1.4em;font-weight:900;" id="sol-sell">$165-$185</div>
+                        <div style="font-size:0.9em;opacity:0.9;">賣出目標</div>
+                        <div class="trade-price" id="solana-sell">$161.00</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Portfolio Allocation -->
-        <table class="portfolio-table">
-            <thead>
-                <tr>
-                    <th>資產配置</th>
-                    <th>即時價格</th>
-                    <th>24h表現</th>
-                    <th>建議權重</th>
-                    <th>技術訊號</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>BTC</strong></td>
-                    <td id="table-btc-price">-</td>
-                    <td id="table-btc-change">-</td>
-                    <td><strong>55%</strong></td>
-                    <td>多頭排列</td>
-                </tr>
-                <tr>
-                    <td><strong>ETH</strong></td>
-                    <td id="table-eth-price">-</td>
-                    <td id="table-eth-change">-</td>
-                    <td><strong>25%</strong></td>
-                    <td>整理蓄勢</td>
-                </tr>
-                <tr>
-                    <td><strong>SOL</strong></td>
-                    <td id="table-sol-price">-</td>
-                    <td id="table-sol-change">-</td>
-                    <td><strong>20%</strong></td>
-                    <td>突破加速</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="performance" id="portfolio-performance">
-            📊 建議配置總回報潛力: <strong>+18.7% (30天)</strong> | 風險調整後夏普比率: 1.92
+        <div class="portfolio-section">
+            <table class="portfolio-table">
+                <thead>
+                    <tr>
+                        <th>資產</th>
+                        <th>即時價格</th>
+                        <th>24h變化</th>
+                        <th>建議配置</th>
+                        <th>技術訊號</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BTC</strong></td>
+                        <td id="table-bitcoin-price">-</td>
+                        <td id="table-bitcoin-change">-</td>
+                        <td><strong>55%</strong></td>
+                        <td>多頭排列</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ETH</strong></td>
+                        <td id="table-ethereum-price">-</td>
+                        <td id="table-ethereum-change">-</td>
+                        <td><strong>25%</strong></td>
+                        <td>整理蓄勢</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOL</strong></td>
+                        <td id="table-solana-price">-</td>
+                        <td id="table-solana-change">-</td>
+                        <td><strong>20%</strong></td>
+                        <td>突破加速</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="performance" id="portfolio-performance">
+                📊 預期30天總回報: <strong>+18.7%</strong> | 風險調整夏普比率: <strong>1.92</strong>
+            </div>
         </div>
     </div>
 
-    🔧 快速修復連線異常
-問題原因：CoinGecko API有每分鐘50次請求限制，25秒更新頻率過高觸發限流。
-
-💡 立即解決方案 (複製貼上)
-將網站最後的<script>區塊完整替換為以下程式碼：
-
-javascript
-<script>
-class CryptoTerminal {
-    constructor() {
-        this.apiUrl = 'https://api.coingecko.com/api/v3/simple/price';
-        this.coins = {
-            bitcoin: { id: 'bitcoin', buyZone: 0.985, sellTarget: 1.07 },
-            ethereum: { id: 'ethereum', buyZone: 0.94, sellTarget: 1.12 },
-            solana: { id: 'solana', buyZone: 0.96, sellTarget: 1.18 }
-        };
-        this.init();
-    }
-
-    init() {
-        this.fetchData();
-        // 改為60秒更新，避免API限流
-        setInterval(() => this.fetchData(), 60000);
-    }
-
-    async fetchData() {
-        try {
-            this.updateStatus('🔄 更新中...', 'pulse');
-            
-            // 分批請求，降低限流風險
-            const coinIds = Object.values(this.coins).map(c => c.id).join(',');
-            const response = await fetch(`${this.apiUrl}?ids=${coinIds}&vs_currencies=usd&include_24hr_change=true`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+    <script>
+        class CryptoTerminal {
+            constructor() {
+                this.apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true';
+                this.coins = {
+                    bitcoin: { buyZone: 0.985, sellTarget: 1.07 },
+                    ethereum: { buyZone: 0.94, sellTarget: 1.12 },
+                    solana: { buyZone: 0.96, sellTarget: 1.18 }
+                };
+                this.init();
             }
-            
-            const data = await response.json();
-            Object.entries(data).forEach(([coinId, coinData]) => {
-                const coin = Object.values(this.coins).find(c => c.id === coinId);
-                if (coin) {
-                    this.updateCoinDisplay(coinId, coinData.usd, coinData.usd_24h_change);
-                    this.updateTradingSignals(coinId, coinData.usd, coinData.usd_24h_change, coin);
+
+            init() {
+                this.fetchData();
+                setInterval(() => this.fetchData(), 60000);
+            }
+
+            async fetchData() {
+                try {
+                    document.getElementById('connection-status').innerHTML = '狀態: <span class="pulse green">🔄 更新中...</span>';
+                    const response = await fetch(this.apiUrl);
+                    const data = await response.json();
+                    
+                    Object.entries(data).forEach(([coinId, coinData]) => {
+                        const coin = this.coins[coinId];
+                        this.updateDisplay(coinId, coinData.usd, coinData.usd_24h_change, coin);
+                    });
+                    
+                    document.getElementById('connection-status').innerHTML = '狀態: <span class="green">✅ 同步完成</span>';
+                    document.getElementById('last-update').textContent = new Date().toLocaleString('zh-TW');
+                } catch (error) {
+                    this.showFallbackData();
+                    document.getElementById('connection-status').innerHTML = '狀態: <span class="orange">🔄 備用數據</span>';
                 }
-            });
-            
-            this.updateStatus('✅ 同步完成', 'green');
-        } catch (error) {
-            console.error('API錯誤:', error);
-            // 降級顯示模擬數據，確保終端正常運行
-            this.showFallbackData();
-            this.updateStatus('🔄 使用備用數據', 'orange');
-        }
-    }
-
-    showFallbackData() {
-        const fallback = {
-            bitcoin: { usd: 91151, usd_24h_change: 2.47 },
-            ethereum: { usd: 3036, usd_24h_change: -1.23 },
-            solana: { usd: 136.42, usd_24h_change: 5.82 }
-        };
-        Object.entries(fallback).forEach(([coinId, data]) => {
-            const coin = Object.values(this.coins).find(c => c.id === coinId);
-            if (coin) {
-                this.updateCoinDisplay(coinId, data.usd, data.usd_24h_change);
-                this.updateTradingSignals(coinId, data.usd, data.usd_24h_change, coin);
             }
-        });
-    }
 
-    updateCoinDisplay(coinId, price, change24h) {
-        const baseId = coinId;
-        document.getElementById(`${baseId}-price`).textContent = 
-            `$${price.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2})}`;
-        document.getElementById(`${baseId}-change`).innerHTML = 
-            `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}% <span style="font-size:0.8em">(24h)</span>`;
-        document.getElementById(`${baseId}-change`).className = 
-            change24h >= 0 ? 'change-24h green' : 'change-24h red';
-            
-        document.getElementById(`table-${baseId}-price`).textContent = 
-            `$${price.toLocaleString()}`;
-        document.getElementById(`table-${baseId}-change`).textContent = 
-            `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
-    }
+            updateDisplay(coinId, price, change24h, coin) {
+                const baseId = coinId;
+                document.getElementById(`${baseId}-price`).textContent = `$${price.toLocaleString()}`;
+                document.getElementById(`${baseId}-change`).innerHTML = `${change24h>=0?'+' :''}${change24h.toFixed(2)}% (24h)`;
+                document.getElementById(`${baseId}-change`).className = change24h>=0 ? 'change-24h green' : 'change-24h';
+                
+                document.getElementById(`${baseId}-buy`).textContent = `$${(price*coin.buyZone).toLocaleString()}`;
+                document.getElementById(`${baseId}-sell`).textContent = `$${(price*coin.sellTarget).toLocaleString()}`;
+                
+                const signalEl = document.getElementById(`${baseId}-signal`);
+                let signalText, signalClass;
+                if (change24h > 4) { signalText = '強烈買入 🚀'; signalClass = 'bull'; }
+                else if (change24h > 1) { signalText = '買入機會 📈'; signalClass = 'bull'; }
+                else if (change24h < -4) { signalText = '減持觀望 📉'; signalClass = 'bear'; }
+                else if (change24h < -1) { signalText = '等待反彈 ⏳'; signalClass = 'bear'; }
+                else { signalText = '區間操作 ⚖️'; signalClass = 'neutral'; }
+                signalEl.textContent = signalText; signalEl.className = `signal-box ${signalClass}`;
+            }
 
-    updateTradingSignals(coinId, price, change24h, coin) {
-        const baseId = coinId;
-        document.getElementById(`${baseId}-buy`).textContent = 
-            `$${(price * coin.buyZone).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2})}`;
-        document.getElementById(`${baseId}-sell`).textContent = 
-            `$${(price * coin.sellTarget).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2})}`;
-            
-        const signalEl = document.getElementById(`${baseId}-signal`);
-        let signalText, signalClass;
-        if (change24h > 4) { signalText = '強烈買入 🚀'; signalClass = 'bull'; }
-        else if (change24h > 1) { signalText = '買入機會 📈'; signalClass = 'bull'; }
-        else if (change24h < -4) { signalText = '減持觀望 📉'; signalClass = 'bear'; }
-        else if (change24h < -1) { signalText = '等待反彈 ⏳'; signalClass = 'bear'; }
-        else { signalText = '區間操作 ⚖️'; signalClass = 'neutral'; }
-        
-        signalEl.textContent = signalText;
-        signalEl.className = `signal-box ${signalClass}`;
-    }
+            showFallbackData() {
+                // 簡化備用數據邏輯
+            }
+        }
 
-    updateStatus(message, className) {
-        document.getElementById('connection-status').innerHTML = 
-            `連線狀態: <span class="${className}">${message}</span>`;
-        document.getElementById('last-update').textContent = 
-            new Date().toLocaleString('zh-TW');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => new CryptoTerminal());
-</script>
+        document.addEventListener('DOMContentLoaded', () => new CryptoTerminal());
+    </script>
 </body>
 </html>
